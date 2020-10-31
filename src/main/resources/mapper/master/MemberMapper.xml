@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.tmapi.dao.master.MemberDao">
+
+    <select id="queryByCond" resultType="Integer">
+        select count(*) from member where MobileNO=#{tel}
+    </select>
+
+    <select id="queryNewMember" resultType="com.example.tmapi.entity.Member" parameterType="com.example.tmapi.entity.Member">
+        SELECT
+            StoreID,
+            COUNT (cardid) AS NewMember
+        FROM
+            Member
+        WHERE
+            OperDate  >= #{member.startDate}
+        AND OperDate &lt;= #{member.endDate}
+            GROUP BY
+            StoreID
+    </select>
+
+    <select id="querySumMember" resultType="com.example.tmapi.entity.Member" >
+        SELECT
+        StoreID,
+        COUNT (MemberID) AS sumNo
+        FROM
+        Member
+        WHERE
+        FirstName is not null
+        and FirstName !=''
+        GROUP BY
+        StoreID
+    </select>
+
+
+
+
+</mapper>

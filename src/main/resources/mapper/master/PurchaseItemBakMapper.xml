@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.tmapi.dao.master.PurchaseItemBakDao">
+
+    <select id="querySumAmountTodayById" resultType="com.example.tmapi.entity.PurchaseItemBak" parameterType="com.example.tmapi.entity.PurchaseItemBak" >
+        SELECT SUM (Amount) TodaySumAmount
+        FROM
+        purchaseItemBak p
+        LEFT JOIN POSSeller s ON p.SellerID = s.SellerName
+        WHERE
+        1 = 1
+        <if test="purchaseItemBak.StoreId != null">
+            and p.StoreId = #{purchaseItemBak.StoreId}
+        </if>
+        <if test="purchaseItemBak.StoreId != null">
+            and s.StoreId = #{purchaseItemBak.StoreId}
+        </if>
+        <if test="purchaseItemBak.SellerID != null">
+            and s.SellerID = #{purchaseItemBak.SellerID}
+        </if>
+        <if test="purchaseItemBak.startDate != null">
+            and p.BuyDate = #{purchaseItemBak.startDate}
+        </if>
+
+
+    </select>
+
+
+    <select id="queryByStoreId" resultType="com.example.tmapi.entity.PurchaseItemBak" parameterType="com.example.tmapi.entity.PurchaseItemBak">
+        SELECT
+            StoreId,
+            SUM(Amount) as TodaySumAmount,
+            sum(Qty * StockPrice) as SaleCost,
+            sum(Amount-Qty * StockPrice) as sumProfit
+
+        FROM
+            PurchaseItemBak
+        WHERE 1=1
+        <if test="purchaseItemBak.startDate != null">
+            and  BuyDate = #{purchaseItemBak.startDate}
+        </if>
+        <if test="purchaseItemBak.StoreId != null">
+            and StoreID = #{purchaseItemBak.StoreId}
+        </if>
+        <if test="purchaseItemBak.SellerID != null">
+            and  SellerID = #{purchaseItemBak.SellerID}
+        </if>
+        GROUP BY
+            StoreID
+
+    </select>
+
+</mapper>

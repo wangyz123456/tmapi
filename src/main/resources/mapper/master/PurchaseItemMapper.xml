@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.tmapi.dao.master.PurchaseItemDao">
+    <resultMap id="BaseResultMap" type="com.example.tmapi.entity.PurchaseItem" >
+        <result column="BuyDate" property="BuyDate" jdbcType="DATE" />
+        <result column="StoreId" property="StoreId" jdbcType="VARCHAR" />
+        <result column="MachID" property="MachID" jdbcType="VARCHAR" />
+        <result column="ReceiptId" property="ReceiptId" jdbcType="INTEGER" />
+        <result column="SN" property="SN" jdbcType="SMALLINT" />
+        <result column="GoodsID" property="GoodsID" jdbcType="INTEGER" />
+        <result column="Qty" property="Qty" jdbcType="DECIMAL" />
+        <result column="Price" property="Price" jdbcType="DECIMAL" />
+        <result column="Amount" property="TotalAmount" jdbcType="DECIMAL" />
+    </resultMap>
+
+    <select id="queryByCond" resultType="com.example.tmapi.entity.PurchaseItem" parameterType="com.example.tmapi.entity.PurchaseItem" >
+        SELECT
+            p.ReceiptID,
+            p.BuyDate,
+            p.StoreID,
+            p.MachId,
+            s.StoreName,
+            p.GoodsID,
+            g.Name,
+            g.BarCode,
+            p.Qty,
+            p.Price,
+            p.Amount
+        FROM
+            PurchaseItem p
+        LEFT JOIN Stores s ON p.StoreId = s.StoreId
+        LEFT JOIN Goods g ON p.GoodsID = g.GoodsID
+        WHERE 1=1
+        <if test="purchaseItem.ReceiptID != null">
+            and p.ReceiptID = #{purchaseItem.ReceiptID}
+        </if>
+        <if test="purchaseItem.StoreID != null">
+            and p.StoreID = #{purchaseItem.StoreID}
+        </if>
+        <if test="purchaseItem.MachId != null">
+            and p.MachId = #{purchaseItem.MachId}
+        </if>
+        <if test="purchaseItem.BuyDate != null">
+            and p.BuyDate = #{purchaseItem.BuyDate}
+        </if>
+    </select>
+
+    <select id="querySumAmountById" resultType="com.example.tmapi.entity.Purchase" parameterType="com.example.tmapi.entity.Purchase" >
+        SELECT SUM (Amount) SumAmount
+        FROM
+        purchaseItem p
+        LEFT JOIN POSSeller s ON p.SellerID = s.SellerName
+        WHERE
+        1 = 1
+        <if test="purchase.StoreId != null">
+            and p.StoreId = #{purchase.StoreId}
+        </if>
+        <if test="purchase.StoreId != null">
+            and s.StoreId = #{purchase.StoreId}
+        </if>
+        <if test="purchase.SellerID != null">
+            and s.SellerID = #{purchase.SellerID}
+        </if>
+        <if test="purchase.startDate != null">
+            and p.BuyDate >= #{purchase.startDate}
+        </if>
+
+
+    </select>
+
+    <select id="queryFsAmount" resultType="com.example.tmapi.entity.PurchaseItem" parameterType="com.example.tmapi.entity.PurchaseItem">
+        SELECT
+        StoreId,
+        SUM(Amount) as TodaySumAmount,
+        sum(Qty * StockPrice) as SaleCost,
+        sum(Amount-Qty * StockPrice) as sumProfit
+
+        FROM
+        PurchaseItem
+        WHERE 1=1
+        <if test="purchaseItem.startDate != null">
+            and  BuyDate >= #{purchaseItem.startDate}
+        </if>
+        <if test="purchaseItem.StoreID != null">
+            and StoreID = #{purchaseItem.StoreID}
+        </if>
+        <if test="purchaseItem.SellerID != null">
+            and  SellerID = #{purchaseItem.SellerID}
+        </if>
+        GROUP BY
+        StoreID
+
+    </select>
+
+</mapper>

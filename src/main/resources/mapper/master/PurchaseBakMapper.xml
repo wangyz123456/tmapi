@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.tmapi.dao.master.PurchaseBakDao">
+
+     <select id="querySumAmountByStoreId" resultType="com.example.tmapi.entity.PurchaseBak" parameterType="com.example.tmapi.entity.PurchaseBak">
+        SELECT
+
+            SUM(p.Amount) as TodaySumAmount,
+            sum(p.Qty * p.StockPrice) as SaleCost,
+            sum(p.Amount-p.Qty * p.StockPrice) as sumProfit
+
+        FROM
+            PurchaseItemBak p left join  PurchaseBak b
+         on p.BuyDate = b.BuyDate and p.StoreID = b.StoreID and p.MachID = b.MachID and p.ReceiptID = b.ReceiptID
+        WHERE 1=1
+         <if test="purchaseBak.StoreId != null">
+             and b.StoreID = #{purchaseBak.StoreId}
+         </if>
+         and
+         ( b.BuyDate = #{purchaseBak.BuyDate}
+         and  b.BuyTime >= #{purchaseBak.BuyTime}
+         or   b.BuyDate > #{purchaseBak.BuyDate})
+
+
+    </select>
+
+
+    <select id="queryCustomNoAndAmt" resultType="com.example.tmapi.entity.PurchaseBak" parameterType="com.example.tmapi.entity.PurchaseBak">
+        SELECT
+        StoreID,
+        SUM (TotalAmount) AS AMT,
+        COUNT (DISTINCT(CardID)) AS HYS
+        FROM
+        Purchasebak
+        WHERE
+        BuyDate = #{purchaseBak.BuyDate}
+        AND CardID !=''
+        and CardID is not null
+        GROUP BY
+        StoreID
+
+
+    </select>
+
+</mapper>

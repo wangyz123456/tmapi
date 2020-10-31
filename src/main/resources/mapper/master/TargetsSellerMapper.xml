@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.tmapi.dao.master.TargetsSellerDao">
+
+    <select id="queryTargetsSellerByCond" resultType="com.example.tmapi.entity.TargetsSeller" parameterType="com.example.tmapi.entity.TargetsSeller">
+        select Goals from TargetsSeller
+        WHERE 1=1
+        <if test="targetsSeller.StoreID != null">
+            and StoreID = #{targetsSeller.StoreID}
+        </if>
+        <if test="targetsSeller.SellerID != null">
+            and SellerID = #{targetsSeller.SellerID}
+        </if>
+        <if test="targetsSeller.Date != null">
+            and Date = #{targetsSeller.Date}
+        </if>
+
+    </select>
+
+</mapper>

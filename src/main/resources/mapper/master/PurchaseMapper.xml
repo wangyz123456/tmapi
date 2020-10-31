@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.tmapi.dao.master.PurchaseDao">
+    <resultMap id="BaseResultMap" type="com.example.tmapi.entity.Purchase" >
+        <result column="BuyDate" property="BuyDate" jdbcType="DATE" />
+        <result column="StoreId" property="StoreId" jdbcType="VARCHAR" />
+        <result column="MachID" property="MachID" jdbcType="VARCHAR" />
+        <result column="ReceiptId" property="ReceiptId" jdbcType="INTEGER" />
+        <result column="BuyTime" property="BuyTime" jdbcType="VARCHAR" />
+        <result column="MemberId" property="MemberId" jdbcType="DECIMAL" />
+        <result column="CardID" property="CardID" jdbcType="VARCHAR" />
+        <result column="TotalAmount" property="TotalAmount" jdbcType="DECIMAL" />
+    </resultMap>
+
+    <select id="queryByTel" resultType="com.example.tmapi.entity.Purchase" parameterType="com.example.tmapi.entity.Purchase" >
+        SELECT
+            p.ReceiptId,
+            p.BuyDate,
+            p.BuyTime,
+            p.MachID,
+            p.StoreId,
+            p.CardID,
+            s.StoreName,
+            p.TotalAmount
+        FROM
+            purchase p
+        LEFT JOIN Stores s ON p.StoreId = s.StoreId
+        WHERE 1=1
+        and p.BuyDate >= #{purchase.BuyDate}
+        and p.CardID IN (
+                SELECT
+                    CardID
+                FROM
+                    member
+                WHERE
+                    MobileNO = #{purchase.Tel}
+            )
+        ORDER BY BuyDate DESC
+    </select>
+
+<!--    <select id="querySumAmountById" resultType="com.example.tmapi.entity.Purchase" parameterType="com.example.tmapi.entity.Purchase" >-->
+<!--        SELECT SUM (TotalAmount) SumAmount-->
+<!--            FROM-->
+<!--                purchase p-->
+<!--            LEFT JOIN POSSeller s ON p.SellerID = s.SellerName-->
+<!--            WHERE-->
+<!--                1 = 1-->
+<!--        <if test="purchase.StoreId != null">-->
+<!--            and p.StoreId = #{purchase.StoreId}-->
+<!--        </if>-->
+<!--        <if test="purchase.StoreId != null">-->
+<!--            and s.StoreId = #{purchase.StoreId}-->
+<!--        </if>-->
+<!--        <if test="purchase.SellerID != null">-->
+<!--            and s.SellerID = #{purchase.SellerID}-->
+<!--        </if>-->
+<!--        <if test="purchase.startDate != null">-->
+<!--            and p.BuyDate >= #{purchase.startDate}-->
+<!--        </if>-->
+
+
+<!--    </select>-->
+
+
+
+    <select id="selectByList" resultMap="BaseResultMap">
+        select
+        *
+        from purchase where 1=1
+<!--        <if test="age != null">-->
+<!--            and age = #{age}-->
+<!--        </if>-->
+<!--        <if test="name != null">-->
+<!--            and name like concat('%', #{name},'%')-->
+<!--        </if>-->
+    </select>
+    <select id="findByName" parameterType="string" resultMap="BaseResultMap">
+        select
+        *
+        from purchase
+--         WHERE name=#{name,jdbcType=VARCHAR}
+    </select>
+
+
+    <!-- 新增 -->
+    <insert id="save" parameterType="com.example.tmapi.entity.Purchase"  >
+--          insert into purchase(name,age,password) values (#{name},#{age},#{password})
+      </insert>
+
+    <!-- 修改 -->
+    <update id="update" parameterType="com.example.tmapi.entity.Purchase" >
+--         update purchase set name=#{name},age=#{age},password=#{password} where id=#{id}
+      </update>
+
+    <!-- 删除 -->
+    <delete id="delete" parameterType="java.lang.Integer">
+--           delete from purchase where id=#{id,jdbcType=INTEGER}
+      </delete>
+
+
+
+</mapper>
