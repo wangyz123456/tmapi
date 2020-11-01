@@ -3,6 +3,7 @@ package com.example.tmapi.utils;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,6 +60,21 @@ public class ChartData implements Serializable {
     private Map<String ,Object> jrhykdjMap;
     //今日会员消费占比
     private Map<String ,Object> jrhyxfzbMap;
+    //今日总销售
+    private BigDecimal todayZXS;
+    //今日总毛利
+    private BigDecimal todayZML;
+    //今日零售销售
+    private BigDecimal todayLSXS;
+    //今日零售毛利
+    private BigDecimal todayLSML;
+    //今日批发销售
+    private BigDecimal todayPFXS;
+    //今日批发毛利
+    private BigDecimal todayPFML;
+
+
+
 
 
 

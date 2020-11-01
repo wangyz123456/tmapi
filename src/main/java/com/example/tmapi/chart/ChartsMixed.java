@@ -83,15 +83,17 @@ public class ChartsMixed {
     }
     public void createMixedCharts(String path, ChartData chartData) {
 
-        String[] categories = new String[chartData.getMdlstdyMap().size()];
+        String[] categories = new String[chartData.getMdlstbMap().size()];
         BigDecimal[] shuzuData = new BigDecimal[chartData.getMdlstdyMap().size()];
         int i = 0;
-        for (Map.Entry<String, Object> entry : chartData.getMdlstdyMap().entrySet()) {
+        for (Map.Entry<String, Object> entry : chartData.getMdlstbMap().entrySet()) {
             categories[i]=entry.getKey();
-            shuzuData[i] = (BigDecimal) entry.getValue();
             i++;
         }
 
+        for(int j = 0; j < categories.length; j++){
+            shuzuData[j] = (BigDecimal) chartData.getMdlstdyMap().get(categories[j]);
+        }
 
         CategoryDataset dataSetColumn = createBarDataset(chartData.getMdlstdMap(),shuzuData,categories);
         CategoryDataset dataSetLine = createLineDataset(chartData.getMdlstbMap(),categories);

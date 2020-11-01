@@ -20,6 +20,8 @@ public class GaugeChart  {
         Double dd = ss.doubleValue();
         if(Double.doubleToLongBits(dd) > Double.doubleToLongBits(100D) ){
             dd = 100D;
+        }else if(Double.doubleToLongBits(dd)<Double.doubleToLongBits(0D)){
+              dd = 0D;
         }
         DefaultValueDataset dataset1 = new DefaultValueDataset(dd);
         DialPlot plot = new DialPlot();

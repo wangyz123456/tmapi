@@ -161,30 +161,73 @@ public class GoalSetServiceImpl implements GoalSetService {
         Map<String ,Object> mdlshbMap = new HashMap<>();
         //门店零售 （上月今日）
         Map<String ,Object> mdlstdmMap = new HashMap<>();
-         //
+         //总部  累计总毛利（目标）批发+零售
         BigDecimal sumfm = new BigDecimal(0);
-        //
+        //总部   累计总毛利（实际）批发+零售
         BigDecimal sumfz = new BigDecimal(0);
 
+        //今日完零售成度（仪表盘）
+        //总零售销售（目标）
+        BigDecimal lsxsfm = new BigDecimal(0);
+        //总零售销售 （实际）
+        BigDecimal lsxsfz = new BigDecimal(0);
+        //总批发销售 （目标）
+        BigDecimal pfxsfm = new BigDecimal(0);
+        //总批发销售 （实际）
+        BigDecimal pfxsfz = new BigDecimal(0);
+        //总销售  （目标）
+        BigDecimal zxsfm = new BigDecimal(0);
+        //总销售 （实际）
+        BigDecimal zxsfz = new BigDecimal(0);
+
+
+        //今日毛利完成度（仪表盘）
+        //总零售毛利 （目标）
+        BigDecimal lsmlfm = new BigDecimal(0);
+        //总零售毛利 （实际）
+        BigDecimal lsmlfz = new BigDecimal(0);
+        //总批发毛利 （目标）
+        BigDecimal pfmlfm = new BigDecimal(0);
+        //总批发毛利 （实际）
+        BigDecimal pfmlfz = new BigDecimal(0);
+        //总毛利 （目标）
+        BigDecimal zmlfm = new BigDecimal(0);
+        //总毛利实际 （实际）
+        BigDecimal zmlfz = new BigDecimal(0);
 
 
         for (GoalSet goalSet:list) {
-
+            //今日销售额（实际）
             BigDecimal jrfz =  new BigDecimal(0);
+            //去年今日各店销售额
             BigDecimal jrfm =  new BigDecimal(0);
+            //上个月今日各店销售额
             BigDecimal syjrfm =  new BigDecimal(0);
-
+             //今天总毛利（批发+零售）实际
             BigDecimal tsummlfz = new BigDecimal(0);
+            //今日毛利（批发+零售）目标
             BigDecimal tsummlfm = new BigDecimal(0);
 
+            //零售+批发毛利（月）目标
             BigDecimal fm = new BigDecimal(goalSet.getAmtLm()+goalSet.getAmtPm());
+            //零售+批发毛利（月）实际
             BigDecimal fz = new BigDecimal(0);
-
+            //今日销售额（批发+零售）目标
             BigDecimal zxstfm = new BigDecimal(goalSet.getTamtLx()+goalSet.getTamtPx());
+            //今日总销售额（批发+零售）实际
             BigDecimal zxstfz = new BigDecimal(0);
 
 
+
+            lsxsfm = lsxsfm.add(new BigDecimal(goalSet.getTamtLx()));
+            lsmlfm = lsmlfm.add(new BigDecimal(goalSet.getTamtLm()));
+            pfxsfm = pfxsfm.add(new BigDecimal(goalSet.getTamtPx()));
+            pfmlfm = pfmlfm.add(new BigDecimal(goalSet.getTamtPm()));
+
+
             tsummlfm = tsummlfm.add(new BigDecimal(goalSet.getTamtLm())).add(new BigDecimal(goalSet.getTamtPm()));
+
+
              if(goalSet.getStoreId().equals("FSCY")) {
                  if(fsPurchaseItem!=null)
                      fz = fz.add(fsPurchaseItem.getSumProfit()) ;
@@ -193,6 +236,8 @@ public class GoalSetServiceImpl implements GoalSetService {
                      tsummlfz = tsummlfz.add(fsPurchaseItemBak.getSumProfit());
                      jrfz = jrfz.add(fsPurchaseItemBak.getTodaySumAmount());
                      zxstfz = zxstfz.add(fsPurchaseItemBak.getTodaySumAmount());
+                     lsxsfz = lsxsfz.add(fsPurchaseItemBak.getTodaySumAmount());
+                     lsmlfz = lsmlfz.add(fsPurchaseItemBak.getSumProfit());
                  }
              }
              else{
@@ -221,8 +266,9 @@ public class GoalSetServiceImpl implements GoalSetService {
                                  tsummlfz = tsummlfz.add(purchaseItemBakDto.getSumProfit().subtract(fsPurchaseItemBak.getSumProfit()));
                                  jrfz = jrfz.add(purchaseItemBakDto.getTodaySumAmount().subtract(fsPurchaseItemBak.getTodaySumAmount()));
                                  zxstfz = zxstfz.add(purchaseItemBakDto.getTodaySumAmount().subtract(fsPurchaseItemBak.getTodaySumAmount()));
-                             }
-                             else{
+                                 lsxsfz = lsxsfz.add(purchaseItemBakDto.getTodaySumAmount().subtract(fsPurchaseItemBak.getTodaySumAmount()));
+                                 lsmlfz = lsmlfz.add(purchaseItemBakDto.getSumProfit().subtract(fsPurchaseItemBak.getSumProfit()));
+                             } else{
                                  fz = fz.add(purchaseItemBakDto.getSumProfit());
                                  jrfz = jrfz.add(purchaseItemBakDto.getTodaySumAmount());
                                  zxstfz = zxstfz.add(purchaseItemBakDto.getTodaySumAmount());
@@ -235,14 +281,22 @@ public class GoalSetServiceImpl implements GoalSetService {
                                  tsummlfz = tsummlfz.add(purchaseBak004.getSumProfit());
                                  jrfz = jrfz.add(purchaseBak004.getTodaySumAmount());
                                  zxstfz = zxstfz.add(purchaseBak004.getTodaySumAmount());
+                                 lsxsfz = lsxsfz.add(purchaseBak004.getTodaySumAmount());
+                                 lsmlfz = lsmlfz.add(purchaseBak004.getSumProfit());
                              }else if(goalSet.getStoreId().equals("065")){
                                  tsummlfz = tsummlfz.add(purchaseBak065.getSumProfit());
                                  jrfz = jrfz.add(purchaseBak065.getTodaySumAmount());
                                  zxstfz = zxstfz.add(purchaseBak065.getTodaySumAmount());
+                                 lsxsfz = lsxsfz.add(purchaseBak065.getTodaySumAmount());
+                                 lsmlfz = lsmlfz.add(purchaseBak065.getSumProfit());
+
                              }else {
                                  tsummlfz = tsummlfz.add(purchaseItemBakDto.getSumProfit());
                                  jrfz = jrfz.add(purchaseItemBakDto.getTodaySumAmount());
                                  zxstfz = zxstfz.add(purchaseItemBakDto.getTodaySumAmount());
+                                 lsxsfz = lsxsfz.add(purchaseItemBakDto.getTodaySumAmount());
+                                 lsmlfz = lsmlfz.add(purchaseItemBakDto.getSumProfit());
+
                              }
 
                              break;
@@ -257,6 +311,8 @@ public class GoalSetServiceImpl implements GoalSetService {
                          fz.add(clientPurItemDto.getSumProfit());
                          tsummlfz = tsummlfz.add(clientPurItemDto.getSumProfit());
                          zxstfz = zxstfz.add(clientPurItemDto.getTotalAmount());
+                         pfxsfz =  pfxsfz.add(clientPurItemDto.getTotalAmount());
+                         pfmlfz = pfmlfz.add(clientPurItemDto.getSumProfit());
                          break;
                      }
 
@@ -305,80 +361,36 @@ public class GoalSetServiceImpl implements GoalSetService {
 
 
         }
+
+
         //今日总销售达标率
         chartData.setZxsdblMap(MapSortUtil.sortByValueDesc(zxsdblMap));
         //今日毛利达标率
         chartData.setTmldblMap(MapSortUtil.sortByValueDesc(tmldblMap));
         //门店零售同比
-        chartData.setMdlstbMap(mdlstbMap);
+        chartData.setMdlstbMap(MapSortUtil.sortByValueAsc(mdlstbMap));
         chartData.setMdlstdMap(mdlstdMap);
         chartData.setMdlstdyMap(mdlstdyMap);
         //门店零售环比
         chartData.setMdlstdmMap(mdlstdmMap);
-        chartData.setMdlshbMap(mdlshbMap);
+        chartData.setMdlshbMap(MapSortUtil.sortByValueAsc(mdlshbMap));
 
         zmldblMap.put("总部",sumfz.multiply(new BigDecimal(100)).divide(sumfm, 2, BigDecimal.ROUND_HALF_UP));
-        chartData.setZmldblMap(zmldblMap);
-
-
-        //今日完零售成度（仪表盘）
-        BigDecimal lsxsfm = new BigDecimal(0);
-        BigDecimal lsxsfz = new BigDecimal(0);
-        BigDecimal pfxsfm = new BigDecimal(0);
-        BigDecimal pfxsfz = new BigDecimal(0);
-
-        BigDecimal zxsfm = new BigDecimal(0);
-        BigDecimal zxsfz = new BigDecimal(0);
-
-
-        //今日毛利完成度（仪表盘）
-        BigDecimal lsmlfm = new BigDecimal(0);
-        BigDecimal lsmlfz = new BigDecimal(0);
-        BigDecimal pfmlfm = new BigDecimal(0);
-        BigDecimal pfmlfz = new BigDecimal(0);
-
-        BigDecimal zmlfm = new BigDecimal(0);
-        BigDecimal zmlfz = new BigDecimal(0);
-
-        for (GoalSet goalSet:list) {
-
-
-
-            lsxsfm = lsxsfm.add(new BigDecimal(goalSet.getTamtLx()));
-            lsmlfm = lsmlfm.add(new BigDecimal(goalSet.getTamtLm()));
-            pfxsfm = pfxsfm.add(new BigDecimal(goalSet.getTamtPx()));
-            pfmlfm = pfmlfm.add(new BigDecimal(goalSet.getTamtPm()));
-
-            for (PurchaseItemBak purchaseItemBakDto:purchaseItemBakList) {
-                if(goalSet.getStoreId().equals(purchaseItemBakDto.getStoreId())){
-                    lsxsfz = lsxsfz.add(purchaseItemBakDto.getTodaySumAmount());
-                    lsmlfz = lsmlfz.add(purchaseItemBakDto.getSumProfit());
-
-                    break;
-                }
-            }
-
-
-            for (ClientPurItem clientPurItemDto:clientPurItemList) {
-                if(goalSet.getStoreId().equals(clientPurItemDto.getStoreID())){
-                    pfxsfz =  pfxsfz.add(clientPurItemDto.getTotalAmount());
-                    pfmlfz = pfmlfz.add(clientPurItemDto.getSumProfit());
-
-                    break;
-                }
-            }
-
-        }
+        chartData.setZmldblMap(MapSortUtil.sortByValueDesc(zmldblMap));
 
 
         //总销售
         zxsfm = lsxsfm.add(pfxsfm);
         zxsfz = lsxsfz.add(pfxsfz);
-
+        chartData.setTodayZXS(zxsfz);
+        chartData.setTodayLSXS(lsxsfz);
+        chartData.setTodayPFXS(pfxsfz);
         //总毛利
         zmlfm = lsmlfm.add(pfmlfm);
         zmlfz = lsmlfz.add(pfmlfz);
-
+        chartData.setTodayZML(zmlfz);
+        chartData.setTodayLSML(lsmlfz);
+        chartData.setTodayPFML(pfmlfz);
         //零售销售完成度
         Map<String ,Object> lsxswcdMap = new HashMap<>();
         lsxswcdMap.put("零售销售完成度",lsxsfz.multiply(new BigDecimal(100)).divide(lsxsfm, 2, BigDecimal.ROUND_HALF_UP));

@@ -4,14 +4,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Repository;
 
+import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.File;
+import java.util.List;
+
 @Repository
 public class EmailServiceImp implements EmailService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -108,4 +113,55 @@ public class EmailServiceImp implements EmailService {
         }
 
     }
+
+
+    /**
+     * 发送纯单个或多个带附件邮件
+     * @param str
+     * @param subject
+     * @param content
+     * @param fileNames
+     * @return
+     */
+    public  boolean sendAttachmentMail(String str, String subject, String content, String[] fileNames) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage,true);
+            /*helper.setTo(to);*/
+            helper.setSubject(subject);
+            helper.setText(content);
+            helper.setFrom(from);
+            //发送给多人 这里是我的实体类 可以改为对应的邮箱集合
+            String[] To = str.split(";");
+            for (String to : To){
+                mimeMessage.addRecipients(Message.RecipientType.TO, to);
+            }
+            //读取附件文件（传入文件路径）遍历文件数组，实现多个附件的添加
+            if(fileNames.length>0){
+                for (Object string : fileNames) {
+                    FileSystemResource file = new FileSystemResource(string.toString());
+                    String fileName = file.getFilename();
+                    helper.addAttachment(fileName, file);
+                }
+
+                try {
+                    mailSender.send(mimeMessage);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                return true;
+            }else {
+                return false;
+            }
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            //捕获到创建MimeMessageHelper的异常
+        }
+        return true;
+    }
+
+
+
 }

@@ -5,7 +5,9 @@ import com.example.tmapi.email.EmailServiceImp;
 import com.example.tmapi.email.RobotSendServiceImpl;
 import com.example.tmapi.service.GoalSetService;
 import com.example.tmapi.utils.ChartData;
+import com.example.tmapi.utils.DataUtil;
 import com.example.tmapi.utils.DrawTableImgs;
+import com.example.tmapi.utils.MapSortUtil;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,8 +29,7 @@ import java.util.Map;
 public class TestSpringTask {
 
     public Map<String,Object> map = new HashMap();
-    //邮件计数器
-    private static  int count=1;
+
     @Autowired
     private GoalSetService goalSetService;
     @Autowired
@@ -37,6 +38,16 @@ public class TestSpringTask {
     private String user;
     @Value("${spring.mail.filepath}")
     private String filepath;
+
+    //共享资源
+    static int count =0;
+    /**
+     * synchronized 修饰实例方法
+     */
+    public synchronized void increase(){
+        count++;
+    }
+
     //每30秒发送一次
 //    @Async
 //    @Scheduled(cron = "0/50 * * * * ? ")
@@ -47,10 +58,10 @@ public class TestSpringTask {
          SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                emailServiceImp.sendAttachmentsMail(user,"这是包含邮件的邮箱主题","这是springboot第"+count+"封邮件",filepath);
-                count++;
+                emailServiceImp.sendAttachmentsMail(user,"这是包含邮件的邮箱主题","这是springboot第"+0+"封邮件",filepath);
 
-                System.out.println(8);
+
+
             }
         });
     }
@@ -59,6 +70,8 @@ public class TestSpringTask {
     @Scheduled(cron = "0 30 21 * * ?")
     public void dsrwTask(){
         ChartData chartData = goalSetService.queryByDate("");
+        map.clear();
+
 
         SwingUtilities.invokeLater(new Runnable() {
             @SneakyThrows
@@ -67,7 +80,7 @@ public class TestSpringTask {
                 new ChartsMixed().createMixedCharts(creatPath("门店零售同比"),chartData);
                 RobotSendServiceImpl robot= new RobotSendServiceImpl();
                 robot.sendMsg(map.get("门店零售同比").toString(),"门店零售同比","每天进步一点点！");
-
+                increase();
             }
         });
 
@@ -76,8 +89,6 @@ public class TestSpringTask {
             @Override
             public void run() {
                 new ChartsMixedH().createMixedCharts(creatPath("门店零售环比"),chartData);
-                RobotSendServiceImpl robot= new RobotSendServiceImpl();
-                robot.sendMsg(map.get("门店零售环比").toString(),"门店零售环比","每天进步一点点！");
 
             }
         });
@@ -157,12 +168,13 @@ public class TestSpringTask {
     @Scheduled(cron = "${timer.cron}")
     public void testTask() {
         ChartData chartData = goalSetService.queryByDate("");
-
+        map.clear();
         SwingUtilities.invokeLater(new Runnable() {
 
             @Override
             public void run() {
                 creatTask(chartData);
+                increase();
             }
         });
         SwingUtilities.invokeLater(new Runnable() {
@@ -170,6 +182,7 @@ public class TestSpringTask {
             @Override
             public void run() {
                 new BarChart3DChartHJMD().createChart(creatPath("加盟店业绩排名"),chartData,"加盟店业绩排名");
+                increase();
             }
         });
 
@@ -178,6 +191,7 @@ public class TestSpringTask {
             @Override
             public void run() {
                 new ChartsMixedY().createMixedCharts(creatPath("月度零售对比曲线"),chartData);
+                increase();
             }
         });
 
@@ -186,6 +200,7 @@ public class TestSpringTask {
             @Override
             public void run() {
                 new BarChart3DChartH().createChart(creatPath("总销售达标率"),chartData.getZxsdblMap(),"总销售达标率");
+                increase();
             }
         });
 
@@ -196,7 +211,7 @@ public class TestSpringTask {
                 new ChartsMixed().createMixedCharts(creatPath("门店零售同比"),chartData);
 //                RobotSendServiceImpl robot= new RobotSendServiceImpl();
 //                robot.sendMsg(map.get("门店零售同比").toString(),"门店零售同比","每天进步一点点！");
-
+                increase();
             }
         });
 
@@ -205,9 +220,7 @@ public class TestSpringTask {
             @Override
             public void run() {
                 new ChartsMixedH().createMixedCharts(creatPath("门店零售环比"),chartData);
-//                RobotSendServiceImpl robot= new RobotSendServiceImpl();
-//                robot.sendMsg(map.get("门店零售环比").toString(),"门店零售环比","每天进步一点点！");
-
+                increase();
             }
         });
 
@@ -218,6 +231,7 @@ public class TestSpringTask {
                 new BarChart3DChartH().createChart(creatPath("总毛利达标率"),chartData.getZmldblMap(),"总毛利达标率");
 //                RobotSendServiceImpl robot= new RobotSendServiceImpl();
 //                robot.sendMsg(map.get("总毛利达标率").toString(),"总毛利达标率","加油！必胜！");
+                increase();
             }
         });
 
@@ -233,34 +247,35 @@ public class TestSpringTask {
 //                    break;
 //                }
 //                robot.sendMsg(map.get("今日总毛利达标率").toString(),"今日总毛利达标率","目前完成度最高的是:"+top+"\n");
+                increase();
             }
         });
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 new GaugeChart().createChart("零售销售完成度",creatPath("零售销售完成度"),chartData.getLsxswcdMap());
-
+                increase();
             }
         });
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 new GaugeChart().createChart("总销售额完成度",creatPath("总销售额完成度"),chartData.getZxsewcdMap());
-
+                increase();
             }
         });
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 new GaugeChart().createChart("批发销售完成度",creatPath("批发销售完成度"),chartData.getPfxswcdMap());
-
+                increase();
             }
         });
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 new GaugeChart().createChart("零售毛利完成度",creatPath("零售毛利完成度"),chartData.getLsmlwcdMap());
-
+                increase();
             }
         });
 
@@ -268,14 +283,41 @@ public class TestSpringTask {
             @Override
             public void run() {
                 new GaugeChart().createChart("总毛利完成度",creatPath("总毛利完成度"),chartData.getZmlwcdMap());
-
+                increase();
             }
         });
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 new GaugeChart().createChart("批发毛利完成度",creatPath("批发毛利完成度"),chartData.getPfmlwcdMap());
+                increase();
+            }
+        });
 
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                boolean flag = true;
+                while (flag) {
+                    if (count == 14) {
+                        count = 0;
+                        String content = "总销售额："+chartData.getTodayZXS()+"元，总毛利额："+chartData.getTodayZML()+"元，综合毛利率：xx%；"+"\n"
+                                +"零售额："+chartData.getTodayLSXS()+"元，零售毛利："+chartData.getTodayLSML()+"元，零售毛利率：xx%；"+"\n"
+                                +"批发额："+chartData.getTodayPFXS()+"元，批发毛利："+chartData.getTodayPFML()+"元，批发毛利率xx%；"+"\n"
+                                +"\n"+"\n"
+                                +"总销售额达标率："+chartData.getZxsewcdMap().get("总销售额完成度")+"%，总毛利额达标率："+chartData.getZmlwcdMap().get("总毛利完成度")+"%；"+"\n"
+                                +"零售销售达标率："+chartData.getLsxswcdMap().get("零售销售完成度")+"%，零售毛利达标率："+chartData.getLsmlwcdMap().get("零售毛利完成度")+"%；"+"\n"
+                                +"批发销售达标率："+chartData.getPfxswcdMap().get("批发销售完成度")+"%，批发毛利达标率："+chartData.getPfmlwcdMap().get("批发毛利完成度")+"%；";
+                        String[] fileNames = new String[map.size()];
+                        int m=0;
+                        for (Map.Entry<String, Object> entry : MapSortUtil.sortByValueAsc(map).entrySet()) {
+                            fileNames[m] = entry.getValue().toString();
+                             m++;
+                        }
+                        emailServiceImp.sendAttachmentMail(user, DataUtil.getNow()+"销售日报表",content,fileNames);
+                        flag = false;
+                    }
+                }
             }
         });
 
