@@ -19,19 +19,19 @@ public class RobotSendServiceImpl {
     private String serverUrl;
    public   void sendMsg(String path,String title,String top1) throws ApiException {
        path=path.substring(path.lastIndexOf("\\")+1);
-       String str = "https://oapi.dingtalk.com/robot/send?access_token=15f87cada1b36af4ba9d5637d10c40961cdaac24ef84eb2d77f036bdcf0e61a3";
-//       String str = "https://oapi.dingtalk.com/robot/send?access_token=08e98f3bfd68ecf2cff5313aa4ab862b2e1c335d0c3ba8959d0c695f3d626ca3";
-       DingTalkClient client = new DefaultDingTalkClient(str);
-       OapiRobotSendRequest request = new OapiRobotSendRequest();
+             String str = "https://oapi.dingtalk.com/robot/send?access_token=15f87cada1b36af4ba9d5637d10c40961cdaac24ef84eb2d77f036bdcf0e61a3";
+       // String str = "https://oapi.dingtalk.com/robot/send?access_token=08e98f3bfd68ecf2cff5313aa4ab862b2e1c335d0c3ba8959d0c695f3d626ca3";
+        DingTalkClient client = new DefaultDingTalkClient(str);
+        OapiRobotSendRequest request = new OapiRobotSendRequest();
 //       request.setMsgtype("text");
 //       OapiRobotSendRequest.Text text = new OapiRobotSendRequest.Text();
 //       text.setContent("测试文本消息");
 //       request.setText(text);
-       OapiRobotSendRequest.At at = new OapiRobotSendRequest.At();
+        OapiRobotSendRequest.At at = new OapiRobotSendRequest.At();
 //       at.setAtMobiles(Arrays.asList("132xxxxxxxx"));
 // isAtAll类型如果不为Boolean，请升级至最新SDK
-       at.setIsAtAll(true);
-       request.setAt(at);
+        at.setIsAtAll(true);
+        request.setAt(at);
 
 //       request.setMsgtype("link");
 //       OapiRobotSendRequest.Link link = new OapiRobotSendRequest.Link();

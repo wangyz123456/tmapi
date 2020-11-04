@@ -78,6 +78,7 @@ public class EmailServiceImp implements EmailService {
             mailSender.send(message);
             //日志信息
             logger.info("邮件已经发送。");
+            System.out.println("");
         } catch (MessagingException e) {
             logger.error("邮件发送失败！", e);
         }
@@ -108,6 +109,7 @@ public class EmailServiceImp implements EmailService {
             helper.addAttachment(fileName, file);
             mailSender.send(message);
             logger.info("邮件发送成功");
+            System.out.println("邮件发送成功");
         } catch (MessagingException e) {
             logger.error("邮件发送失败！", e);
         }

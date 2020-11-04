@@ -106,6 +106,12 @@
             <artifactId>alibaba-dingtalk-service-sdk</artifactId>
             <version>1.0.1</version>
         </dependency>
+        <!--调python 依赖 -->
+        <dependency>
+            <groupId>org.python</groupId>
+            <artifactId>jython-standalone</artifactId>
+            <version>2.7.0</version>
+        </dependency>
 
     </dependencies>
 

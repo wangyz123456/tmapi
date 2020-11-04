@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.tmapi.dao.master.ItemsDao">
+
+    <select id="queryByCond" resultType="com.example.tmapi.entity.Items" parameterType="com.example.tmapi.entity.Items">
+        SELECT
+            i.StoreID as StoreID,
+            i.ReceiptID as ReceiptID,
+            i.GoodsID as GoodsID,
+            SUM (i.RecQty) AS qty
+        FROM
+            Items i
+        right JOIN (
+            SELECT
+                StoreID,
+                ReceiptID
+            FROM
+                Manifest
+            WHERE
+                OrdDate >= #{items.OrdDate}
+            GROUP BY
+                StoreID,
+                ReceiptID
+        ) b ON b.StoreID = i.StoreID
+        AND b.ReceiptID = i.ReceiptID
+        where i.StoreID !=''
+        GROUP BY
+            i.StoreID,
+            i.ReceiptID,
+            i.GoodsID
+         ORDER BY  qty desc
+
+    </select>
+
+
+
+</mapper>

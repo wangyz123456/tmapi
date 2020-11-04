@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.tmapi.dao.master.StockDao">
+
+    <select id="queryByCond" resultType="com.example.tmapi.entity.Stock" parameterType="com.example.tmapi.entity.Stock">
+        SELECT
+            s.StoreID as StoreID,
+            st.StoreName as StoreName,
+            s.GoodsID as GoodsID,
+            g.Name as Name,
+            SUM (s.Quantity) AS Quantity
+        FROM
+            Stock s
+        LEFT JOIN Stores st on st.StoreID = s.StoreID
+        LEFT JOIN Goods g on g.GoodsID = s.GoodsID
+        WHERE
+            s.Quantity >= 1
+        GROUP BY s.StoreID,
+            s.GoodsID,st.StoreName,g.Name
+        order by Quantity desc
+
+    </select>
+
+
+</mapper>
