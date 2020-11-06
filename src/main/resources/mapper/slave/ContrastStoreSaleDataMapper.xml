@@ -15,6 +15,20 @@
         AND   date = #{contrastStoreSaleData.date}
 
     </select>
-
+    <insert id="save" parameterType="com.example.tmapi.entity.ContrastStoreSaleData"  >
+        insert into contrast_storesaledata(DATE,STOREID,LXAMT) values (#{contrastStoreSaleData.date},#{contrastStoreSaleData.storeId},#{contrastStoreSaleData.lxamt})
+    </insert>
+    <insert id="insertForeach" parameterType="java.util.List" useGeneratedKeys="false">
+        insert into contrast_storesaledata
+        ( DATE,STOREID,LXAMT)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.date},
+            #{item.storeId},
+            #{item.lxamt}
+            )
+        </foreach>
+    </insert>
 
 </mapper>

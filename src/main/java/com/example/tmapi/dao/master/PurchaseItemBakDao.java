@@ -22,4 +22,6 @@ public interface PurchaseItemBakDao {
      */
 
     List<PurchaseItemBak> queryByStoreId(@Param("purchaseItemBak") PurchaseItemBak purchaseItemBak);
+
+    List<PurchaseItemBak> queryByDate(@Param("purchaseItemBak") PurchaseItemBak purchaseItemBak);
 }

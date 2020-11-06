@@ -16,5 +16,8 @@
         AND DATE &lt;= #{contrastSaleData.endDate}
     </select>
 
+    <insert id="save" parameterType="com.example.tmapi.entity.ContrastSaleData"  >
+        insert into contrast_saledata(DATE,LXAMT) values (#{contrastSaleData.date},#{contrastSaleData.lxamt})
+    </insert>
 
 </mapper>

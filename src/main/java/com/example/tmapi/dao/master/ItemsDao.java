@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface ItemsDao {
     List<Items> queryByCond(@Param(value = "items")Items items);
+
+    List<Items> queryByDate(@Param(value = "items")Items items);
 }

@@ -12,4 +12,6 @@ public class Stock implements Serializable {
     private int GoodsID;
     private String Name;
     private BigDecimal Quantity;
+    private BigDecimal jhqty;
+    private BigDecimal kczb;
 }

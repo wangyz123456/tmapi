@@ -41,6 +41,30 @@ public class DataUtil {
     /**
      * 自定义格式格式化日期
      */
+    public static Date getFormat() {
+        String value = "";
+        Date date= new Date();
+        if(date != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            value = sdf.format(date);
+        }
+        return parse(value,"yyyy-MM-dd");
+    }
+
+    /**
+     * 自定义格式格式化日期
+     */
+    public static Date getFormat(Date date) {
+        String value = "";
+        if(date != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            value = sdf.format(date);
+        }
+        return parse(value,"yyyy-MM-dd");
+    }
+    /**
+     * 自定义格式格式化日期
+     */
     public static String format(Date date, String format) {
         String value = "";
         if(date != null) {

@@ -19,8 +19,8 @@ public class RobotSendServiceImpl {
     private String serverUrl;
    public   void sendMsg(String path,String title,String top1) throws ApiException {
        path=path.substring(path.lastIndexOf("\\")+1);
-             String str = "https://oapi.dingtalk.com/robot/send?access_token=15f87cada1b36af4ba9d5637d10c40961cdaac24ef84eb2d77f036bdcf0e61a3";
-       // String str = "https://oapi.dingtalk.com/robot/send?access_token=08e98f3bfd68ecf2cff5313aa4ab862b2e1c335d0c3ba8959d0c695f3d626ca3";
+          String str = "https://oapi.dingtalk.com/robot/send?access_token=15f87cada1b36af4ba9d5637d10c40961cdaac24ef84eb2d77f036bdcf0e61a3";
+       //  String str = "https://oapi.dingtalk.com/robot/send?access_token=08e98f3bfd68ecf2cff5313aa4ab862b2e1c335d0c3ba8959d0c695f3d626ca3";
         DingTalkClient client = new DefaultDingTalkClient(str);
         OapiRobotSendRequest request = new OapiRobotSendRequest();
 //       request.setMsgtype("text");

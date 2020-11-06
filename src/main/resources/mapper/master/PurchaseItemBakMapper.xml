@@ -50,4 +50,17 @@
 
     </select>
 
+
+    <select id="queryByDate"  resultType="com.example.tmapi.entity.PurchaseItemBak" parameterType="com.example.tmapi.entity.PurchaseItemBak">
+        SELECT
+          StoreID,
+          GoodsID,
+            SUM (qty) qty
+
+        FROM
+            PurchaseItemBak
+        where  BuyDate >= #{purchaseItemBak.startDate}
+        GROUP BY StoreID,GoodsID
+    </select>
+
 </mapper>

@@ -4,9 +4,10 @@ import com.example.tmapi.dao.master.PurchaseItemDao;
 import com.example.tmapi.entity.PurchaseItem;
 import com.example.tmapi.service.PurchaseItemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+@Service
 public class PurchaseItemServiceImpl implements PurchaseItemService {
     @Autowired
     private PurchaseItemDao purchaseItemDao;

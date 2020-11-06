@@ -8,13 +8,14 @@ import com.example.tmapi.service.TargetsSellerService;
 import com.example.tmapi.utils.DataUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-@Repository
+@Service
 public class TargetsSellerServiceImpl implements TargetsSellerService {
     @Autowired
     private TargetsSellerDao targetsSellerDao;

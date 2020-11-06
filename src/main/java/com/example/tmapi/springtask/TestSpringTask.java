@@ -1,13 +1,17 @@
 package com.example.tmapi.springtask;
 
 import com.example.tmapi.chart.*;
+import com.example.tmapi.dao.slave.ContrastSaleDataDao;
+import com.example.tmapi.dao.slave.ContrastStoreSaleDataDao;
 import com.example.tmapi.email.EmailServiceImp;
 import com.example.tmapi.email.RobotSendServiceImpl;
+import com.example.tmapi.entity.ContrastSaleData;
+import com.example.tmapi.entity.ContrastStoreSaleData;
 import com.example.tmapi.service.GoalSetService;
 import com.example.tmapi.utils.ChartData;
 import com.example.tmapi.utils.DataUtil;
 import com.example.tmapi.utils.DrawTableImgs;
-import com.example.tmapi.utils.MapSortUtil;
+
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,13 +23,10 @@ import org.springframework.stereotype.Component;
 import javax.swing.*;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @EnableScheduling
-
 public class TestSpringTask {
 
     public Map<String,Object> map = new HashMap();
@@ -38,7 +39,10 @@ public class TestSpringTask {
     private String user;
     @Value("${spring.mail.filepath}")
     private String filepath;
-
+    @Autowired
+    private ContrastSaleDataDao contrastSaleDataDao;
+    @Autowired
+    private ContrastStoreSaleDataDao contrastStoreSaleDataDao;
     //共享资源
     static int count =0;
     /**
@@ -65,7 +69,6 @@ public class TestSpringTask {
 
     @Async
     @Scheduled(cron = "0 30 21 * * ?")
-
     public void dsrwTask(){
         ChartData chartData = goalSetService.queryByDate("");
         map.clear();
@@ -207,6 +210,22 @@ public class TestSpringTask {
                 while (flag) {
                     if (count == 14) {
                         count = 0;
+
+                        List<ContrastStoreSaleData> list= new ArrayList<>();
+                        for (Map.Entry<String, Object> entry : chartData.getMdlstdMapID().entrySet()) {
+                            ContrastStoreSaleData dto = new ContrastStoreSaleData();
+                            dto.setDate(DataUtil.getFormat());
+                            dto.setStoreId(entry.getKey());
+                            dto.setLxamt((BigDecimal) entry.getValue());
+                            list.add(dto);
+                        }
+                        contrastStoreSaleDataDao.insertForeach(list);
+                        ContrastSaleData contrastSaleData = new ContrastSaleData();
+                        contrastSaleData.setDate(DataUtil.getFormat());
+                        contrastSaleData.setLxamt(chartData.getTodayLSXS().setScale(2, BigDecimal.ROUND_HALF_UP));
+                        contrastSaleDataDao.save(contrastSaleData);
+
+
                         String content = "总销售额："+chartData.getTodayZXS().setScale(2, BigDecimal.ROUND_HALF_UP)+"元，总毛利额："+chartData.getTodayZML().setScale(2, BigDecimal.ROUND_HALF_UP)+"元，综合毛利率："+delShuju(chartData.getTodayZML(),chartData.getTodayZXS())+"；"+"\n"
                                 +"零售额："+chartData.getTodayLSXS().setScale(2, BigDecimal.ROUND_HALF_UP)+"元，零售毛利："+chartData.getTodayLSML().setScale(2, BigDecimal.ROUND_HALF_UP)+"元，零售毛利率："+delShuju(chartData.getTodayLSML(),chartData.getTodayLSXS())+"；"+"\n"
                                 +"批发额："+chartData.getTodayPFXS().setScale(2, BigDecimal.ROUND_HALF_UP)+"元，批发毛利："+chartData.getTodayPFML().setScale(2, BigDecimal.ROUND_HALF_UP)+"元，批发毛利率:"+delShuju(chartData.getTodayPFML(),chartData.getTodayPFXS())+"；"+"\n"

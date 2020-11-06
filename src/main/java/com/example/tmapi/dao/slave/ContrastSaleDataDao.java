@@ -10,4 +10,6 @@ import java.util.List;
 public interface ContrastSaleDataDao {
 
     List<ContrastSaleData> queryByCond(@Param(value = "contrastSaleData")ContrastSaleData contrastSaleData);
+
+    void save(@Param(value = "contrastSaleData")ContrastSaleData contrastSaleData);
 }

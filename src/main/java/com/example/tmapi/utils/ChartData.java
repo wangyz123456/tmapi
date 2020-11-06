@@ -31,6 +31,8 @@ public class ChartData implements Serializable {
     private  Map<String ,Object> mdlstbMap;
     //门店零售今日
     private  Map<String ,Object> mdlstdMap;
+    //门店零售 （今日）storeid + ls金额
+    private Map<String ,Object> mdlstdMapID;
     //门店零售去年今日
     private  Map<String ,Object> mdlstdyMap;
     //门店零售环比（今日/上月今日）

@@ -18,6 +18,8 @@ public class PurchaseItemBak implements Serializable {
     private String CardID;
     private BigDecimal TotalAmount;
     private String SellerID;
+    private int GoodsID;
+    private BigDecimal qty;
     //总销售额
     private BigDecimal TodaySumAmount;
     //总成本

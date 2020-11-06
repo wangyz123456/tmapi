@@ -35,6 +35,41 @@
 
     </select>
 
+    <select id="queryByDate" resultType="com.example.tmapi.entity.Items" parameterType="com.example.tmapi.entity.Items">
+        SELECT
+            i.StoreID,
+            s.StoreName,
+            i.ReceiptID,
+            i.GoodsID,
+            g.Name,
+            g.KindCode,
+            i.RecQty
+        FROM
+            Items i
+        RIGHT JOIN (
+            SELECT
+                m.StoreID,
+                m.ReceiptID
+            FROM
+                Manifest m,Stores st
+            WHERE
+            m.StoreID = st.StoreID
+           and st.Type=1
+            and	m.RecCheckDate = #{items.date}
+        and Amount>=0
+
+        ) b ON i.StoreID = b.StoreID
+        AND i.ReceiptID = b.ReceiptID,
+         Stores s,
+         Goods g
+        WHERE
+            s.StoreID = i.StoreID
+        AND i.GoodsID = g.GoodsID
+        AND i.RecQty > 0
+    </select>
+
+
+
 
 
 </mapper>

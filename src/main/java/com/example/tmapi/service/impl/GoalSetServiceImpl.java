@@ -153,6 +153,8 @@ public class GoalSetServiceImpl implements GoalSetService {
         Map<String ,Object> tmldblMap = new HashMap<>();
         //门店零售 （今日）
         Map<String ,Object> mdlstdMap = new HashMap<>();
+        //门店零售 （今日）storeid + ls金额
+        Map<String ,Object> mdlstdMapID = new HashMap<>();
         //门店零售 （去年今日）
         Map<String ,Object> mdlstdyMap = new HashMap<>();
         //门店零售同比（今日/去年今日）
@@ -321,14 +323,14 @@ public class GoalSetServiceImpl implements GoalSetService {
 
              for(ContrastStoreSaleData jrContrastStoreSaleData:contrastStoreSaleDataList){
                  if(jrContrastStoreSaleData.getStoreId().equals(goalSet.getStoreId())){
-                     jrfm = jrfm.add(new BigDecimal(jrContrastStoreSaleData.getLxamt()));
+                     jrfm = jrfm.add(jrContrastStoreSaleData.getLxamt());
                      break;
                  }
              }
 
             for(ContrastStoreSaleData jrContrastStoreSaleDatam:contrastStoreSaleDataMonList){
                 if(jrContrastStoreSaleDatam.getStoreId().equals(goalSet.getStoreId())){
-                    syjrfm = syjrfm.add(new BigDecimal(jrContrastStoreSaleDatam.getLxamt()));
+                    syjrfm = syjrfm.add(jrContrastStoreSaleDatam.getLxamt());
                     break;
                 }
             }
@@ -338,6 +340,7 @@ public class GoalSetServiceImpl implements GoalSetService {
              sumfz = sumfz.add(fz);
             mdlstdyMap.put(goalSet.getPrimarySector(),jrfm);
             mdlstdMap.put(goalSet.getPrimarySector(),jrfz);
+            mdlstdMapID.put(goalSet.getStoreId(),jrfz);
             mdlstdmMap.put(goalSet.getPrimarySector(),syjrfm);
 
 
@@ -371,6 +374,8 @@ public class GoalSetServiceImpl implements GoalSetService {
         chartData.setMdlstbMap(MapSortUtil.sortByValueAsc(mdlstbMap));
         chartData.setMdlstdMap(mdlstdMap);
         chartData.setMdlstdyMap(mdlstdyMap);
+
+        chartData.setMdlstdMapID(mdlstdMapID);
         //门店零售环比
         chartData.setMdlstdmMap(mdlstdmMap);
         chartData.setMdlshbMap(MapSortUtil.sortByValueAsc(mdlshbMap));
@@ -631,7 +636,7 @@ public class GoalSetServiceImpl implements GoalSetService {
         list = contrastSaleDataDao.queryByCond(contrastSaleData);
         int i = 1;
         for (ContrastSaleData dto:list) {
-            map.put(i+"",new BigDecimal(dto.getLxamt()));
+            map.put(i+"",dto.getLxamt());
             i++;
         }
         return map;

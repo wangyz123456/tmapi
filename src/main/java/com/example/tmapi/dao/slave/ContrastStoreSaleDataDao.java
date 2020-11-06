@@ -11,4 +11,5 @@ public interface ContrastStoreSaleDataDao {
 
     List<ContrastStoreSaleData> queryByCond(@Param(value = "contrastStoreSaleData")ContrastStoreSaleData contrastStoreSaleData);
 
+    void insertForeach(@Param(value = "list") List<ContrastStoreSaleData> list);
 }
