@@ -16,4 +16,7 @@ public class Items implements Serializable {
     private String StoreName;
     private String Name;
     private String KindCode;
+    private BigDecimal CBAmount;
+    private String BarCode;
+    private BigDecimal Price;
 }

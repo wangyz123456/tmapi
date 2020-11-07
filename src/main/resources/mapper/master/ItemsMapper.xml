@@ -38,34 +38,36 @@
     <select id="queryByDate" resultType="com.example.tmapi.entity.Items" parameterType="com.example.tmapi.entity.Items">
         SELECT
             i.StoreID,
-            s.StoreName,
-            i.ReceiptID,
+            s.StoreName as StoreName,
             i.GoodsID,
-            g.Name,
-            g.KindCode,
-            i.RecQty
+			left(g.KindCode,2) as KindCode,
+			g.BarCode as BarCode,
+            left(g.Name,8) as Name,
+            g.Price as Price,
+            sum(i.RecQty) as RecQty,
+          sum(i.RecQty*i.StockPrice) as CBAmount
         FROM
-            Items i
-        RIGHT JOIN (
-            SELECT
-                m.StoreID,
-                m.ReceiptID
-            FROM
-                Manifest m,Stores st
-            WHERE
-            m.StoreID = st.StoreID
-           and st.Type=1
-            and	m.RecCheckDate = #{items.date}
-        and Amount>=0
-
-        ) b ON i.StoreID = b.StoreID
-        AND i.ReceiptID = b.ReceiptID,
-         Stores s,
-         Goods g
+            Items i,
+            Manifest m,
+            Stores s,
+            Goods g
         WHERE
             s.StoreID = i.StoreID
+        AND i.StoreID = m.StoreID
+        AND i.ReceiptID = m.ReceiptID
+        AND s.Type = 1
+        AND m.RecCheckDate = #{items.date}
+        AND m.Amount >= 0
         AND i.GoodsID = g.GoodsID
         AND i.RecQty > 0
+        GROUP BY i.StoreID,
+            s.StoreName ,
+            i.GoodsID,
+            g.Name ,
+            g.KindCode,
+						g.BarCode,g.Price
+        ORDER BY i.StoreID asc ,G.KindCode asc  ,CBAmount desc
+
     </select>
 
 

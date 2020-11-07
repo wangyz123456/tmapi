@@ -15,7 +15,7 @@ public class DrawTableImgs {
      * @param cellsValue cellsValue
      * @param path path
      */
-    public void myGraphicsGeneration(String cellsValue[][], String path) {
+    public void myGraphicsGeneration(String cellsValue[][], String path,String title) {
         // 字体大小
         int fontTitileSize = 15;
         // 横线的行数
@@ -26,7 +26,7 @@ public class DrawTableImgs {
             totalcol = cellsValue[0].length;
         }
         // 图片宽度
-        int imageWidth = 900;
+        int imageWidth = 1024;
         // 行高
         int rowheight = 30;
         // 图片高度
@@ -57,11 +57,11 @@ public class DrawTableImgs {
         Font font = new Font("微软雅黑",Font.BOLD,fontTitileSize);
         graphics.setFont(font);
         //写标题
-        String title = "会员经营日报表";
+//        String title = "会员经营日报表";
         graphics.drawString(title, startWidth, startHeight+rowheight-10);
         //写入日期 yyyy-MM-dd HH:mm:ss
         String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-        graphics.drawString("日期:"+date, imageWidth/2, startHeight+rowheight-10);
+        graphics.drawString("统计日期:"+date, imageWidth/2+colwidth, startHeight+rowheight-10);
         //写入内容
         for(int n=0;n<cellsValue.length;n++){
             for(int l=0;l<cellsValue[n].length;l++){
@@ -77,6 +77,8 @@ public class DrawTableImgs {
                     graphics.setFont(font);
                     graphics.setColor(Color.BLACK);
                 }
+
+
                 graphics.drawString(cellsValue[n][l].toString(), startWidth+colwidth*l+5, startHeight+rowheight*(n+2)-10);
 //                drawString(graphics, cellsValue[n][l].toString(), startWidth+colwidth*l+5, startHeight+rowheight*(n+2)-10);
             }

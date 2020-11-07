@@ -31,20 +31,16 @@ public class ItemsServiceImpl implements ItemsService {
         bak.setStartDate(DataUtil.getFormat(date));
         List<PurchaseItemBak> bakList = purchaseItemBakDao.queryByDate(bak);
 
-        long startTime=System.currentTimeMillis();
+//        long startTime=System.currentTimeMillis();
         //执行方法
 
         for (Items itemsDto:itemList) {
             Boolean flag = false;
             for (PurchaseItemBak purchaseItemBakDto:bakList) {
-                if(itemsDto.getStoreID().equals(purchaseItemBakDto.getStoreId())){
-                        if(itemsDto.getGoodsID()== purchaseItemBakDto.getGoodsID()){
-
-                                if(purchaseItemBakDto.getQty().compareTo(new BigDecimal(0))==1)
-                                    flag =true;
-                                break;
-                            }
-
+                if(itemsDto.getStoreID().equals(purchaseItemBakDto.getStoreId())&&itemsDto.getGoodsID()== purchaseItemBakDto.getGoodsID()){
+                    if(purchaseItemBakDto.getQty().compareTo(new BigDecimal(0))==1)
+                        flag =true;
+                    break;
                 }
             }
             if(flag==false){
@@ -52,10 +48,9 @@ public class ItemsServiceImpl implements ItemsService {
             }
 
         }
-
-        long endTime=System.currentTimeMillis();
-        float excTime=(float)(endTime-startTime)/1000;
-        System.out.println("执行时间："+excTime+"s");
+//        long endTime=System.currentTimeMillis();
+//        float excTime=(float)(endTime-startTime)/1000;
+//        System.out.println("执行时间："+excTime+"s");
 
         return resultList;
     }
