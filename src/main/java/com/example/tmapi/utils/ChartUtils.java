@@ -430,11 +430,12 @@ public class ChartUtils {
 
         plot.setNoDataMessage(NO_DATA_MSG);
         plot.setInsets(new RectangleInsets(10, 10, 5, 10));
+
         PiePlot piePlot = (PiePlot) plot;
         piePlot.setInsets(new RectangleInsets(0, 0, 0, 0));
         piePlot.setCircular(true);// 圆形
 
-        // piePlot.setSimpleLabels(true);// 简单标签
+        piePlot.setSimpleLabels(true);// 简单标签
         piePlot.setLabelGap(0.01);
         piePlot.setInteriorGap(0.05D);
         piePlot.setLegendItemShape(new Rectangle(10, 10));// 图例形状
@@ -444,7 +445,7 @@ public class ChartUtils {
         piePlot.setLabelOutlinePaint(null);// 去掉边框
         piePlot.setShadowPaint(null);
         // 0:category 1:value:2 :percentage
-        piePlot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0}:{2}"));// 显示标签数据
+        piePlot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0}({1}占{2})"));// 显示标签数据
     }
 
     /**

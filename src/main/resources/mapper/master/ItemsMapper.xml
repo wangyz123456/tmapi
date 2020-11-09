@@ -45,14 +45,18 @@
             left(g.Name,8) as Name,
             g.Price as Price,
             sum(i.RecQty) as RecQty,
-          sum(i.RecQty*i.StockPrice) as CBAmount
+          sum(i.RecQty*i.BuyPrice) as CBAmount
         FROM
             Items i,
             Manifest m,
             Stores s,
-            Goods g
+            Goods g,
+            Stock st
         WHERE
             s.StoreID = i.StoreID
+        and st.StoreID = i.StoreID
+        and st.GoodsID = i.GoodsID
+        and st.Quantity >0
         AND i.StoreID = m.StoreID
         AND i.ReceiptID = m.ReceiptID
         AND s.Type = 1

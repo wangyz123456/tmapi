@@ -31,12 +31,7 @@ public class TestController {
         return "helloWorld";
     }
 
-    @RequestMapping(value = "cs",method = RequestMethod.POST)
-    public List<Items> cs(){
-        Items items = new Items();
-        return itemsService.queryByDate(items);
 
-    }
 
     @RequestMapping(value = "insert",method = RequestMethod.POST)
     public void save(){

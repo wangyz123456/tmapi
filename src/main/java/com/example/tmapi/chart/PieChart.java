@@ -6,6 +6,8 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.block.BlockBorder;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
+import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 
@@ -49,9 +51,18 @@ public class PieChart {
 
     public ChartPanel createChart(String path) {
         //2：创建Chart[创建不同图形]
-        JFreeChart chart = ChartFactory.createPieChart("水果产量图",getDataSet(), true, false,false);
-
-
+        JFreeChart chart = ChartFactory.createPieChart("水果产量图",getDataSet(), true, true,false);
+        // 如果不使用Font,中文将显示不出来
+        Font font = new Font("宋体", Font.BOLD, 12);
+        // 设置图片标题的字体
+        chart.getTitle().setFont(font);
+        // 得到图块,准备设置标签的字体
+        PiePlot plot = (PiePlot) chart.getPlot();
+        // 设置标签字体
+        plot.setLabelFont(font);
+        plot.setStartAngle(new Float(3.14f / 2f));
+        // 图片背景色
+        chart.setBackgroundPaint(Color.white);
         // 3:设置抗锯齿，防止字体显示不清楚
         ChartUtils.setAntiAlias(chart);// 抗锯齿
         // 4:对柱子进行渲染[[采用不同渲染]]
@@ -63,7 +74,7 @@ public class PieChart {
         chart.getLegend().setFrame(new BlockBorder(Color.WHITE));
         //保持到指定位置
         try {
-            ChartUtils.saveAsFile(chart,path,500,300);
+            ChartUtils.saveAsFile(chart,path,800,800);
         } catch (Exception e) {
             e.printStackTrace();
         }

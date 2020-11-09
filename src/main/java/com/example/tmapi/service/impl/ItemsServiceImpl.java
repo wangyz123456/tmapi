@@ -10,9 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
 @Service
 public class ItemsServiceImpl implements ItemsService {
     @Autowired
@@ -20,12 +19,15 @@ public class ItemsServiceImpl implements ItemsService {
     @Autowired
     private PurchaseItemBakDao purchaseItemBakDao;
     @Override
-    public List<Items> queryByDate(Items items) {
+    public Map<String,Object> queryByDate(Items items) {
+        Map<String,Object> map = new HashMap<>();
         items = new Items();
         Date date =DataUtil.addDay(DataUtil.getFormat(),-15) ;
         items.setDate(DataUtil.getFormat(date));
-
-        List<Items> resultList = new ArrayList<>();
+        //未销售
+        List<Items> resultWList = new ArrayList<>();
+        //有销售
+        List<Items> resultYList = new ArrayList<>();
         List<Items> itemList = itemsDao.queryByDate(items);
         PurchaseItemBak bak = new PurchaseItemBak();
         bak.setStartDate(DataUtil.getFormat(date));
@@ -38,20 +40,25 @@ public class ItemsServiceImpl implements ItemsService {
             Boolean flag = false;
             for (PurchaseItemBak purchaseItemBakDto:bakList) {
                 if(itemsDto.getStoreID().equals(purchaseItemBakDto.getStoreId())&&itemsDto.getGoodsID()== purchaseItemBakDto.getGoodsID()){
-                    if(purchaseItemBakDto.getQty().compareTo(new BigDecimal(0))==1)
+                    if(purchaseItemBakDto.getQty().compareTo(new BigDecimal(0))==1){
+                        resultYList.add(itemsDto);
                         flag =true;
+                    }
                     break;
                 }
             }
             if(flag==false){
-                resultList.add(itemsDto);
+                resultWList.add(itemsDto);
             }
 
         }
+
+
 //        long endTime=System.currentTimeMillis();
 //        float excTime=(float)(endTime-startTime)/1000;
 //        System.out.println("执行时间："+excTime+"s");
-
-        return resultList;
+        map.put("resultYList",resultYList);
+        map.put("resultWList",resultWList);
+        return map;
     }
 }

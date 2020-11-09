@@ -57,6 +57,7 @@ public class TestSpringTask {
     }
 
 
+
     @Async
     @Scheduled(cron = "0 0 21 * * ?")
     public void zxspTask(){
@@ -64,11 +65,28 @@ public class TestSpringTask {
             @Override
             public void run() {
                 Items items =new Items();
-                List<Items> list = itemsService.queryByDate(items);
+                Map<String,Object> zxmap = itemsService.queryByDate(items);
+
+                List<Items> wList = (List<Items>) zxmap.get("resultWList");
+                List<Items> yList = (List<Items>) zxmap.get("resultYList");
                 String[] storeIds = {"070", "064", "065", "030", "121", "055", "003", "004", "005", "006", "007", "106", "008","118","329"};
+//                for (String storeID:storeIds) {
+//                    creatTaskZX(wList,storeID);
+//                }
+                Map<String,Object> resultMap = new HashMap<>();
+                Map<String,Object> mdrMap = new HashMap<>();
+                Map<String,Object> wxMap = new HashMap<>();
+                Map<String,Object> zMap = new HashMap<>();
+                resultMap.put("mdrMap",mdrMap);
+                resultMap.put("wxMap",wxMap);
+                resultMap.put("zMap",zMap);
+
                 for (String storeID:storeIds) {
-                    creatTaskZX(list,storeID);
+                    resultMap = creatTaskZX(wList,storeID,yList,resultMap);
                 }
+
+                creatZxZbTask(resultMap);
+
             }
         });
 
@@ -210,17 +228,33 @@ public class TestSpringTask {
     }
 
 
-    public void creatTaskZX(List<Items> list,String storeId) {
+    public Map<String,Object> creatTaskZX(List<Items> list,String storeId,List<Items> ylist,Map<String,Object> resultMap) {
         List<Items> newList = new ArrayList<>();
         String stroeName = "";
+        BigDecimal fz = new BigDecimal(0);
+        BigDecimal fm = new BigDecimal(0);
+
         for (Items items:list) {
             if(storeId.equals(items.getStoreID())){
                 newList.add(items);
+                fz = fz.add(items.getCBAmount());
                 stroeName = items.getStoreName();
             }
 
         }
+
+        for (Items items:ylist) {
+            if(storeId.equals(items.getStoreID())){
+              fm =  fm.add(items.getCBAmount());
+            }
+        }
         if(newList.size()>0) {
+            Map<String,Object> mdrMap = (Map<String, Object>) resultMap.get("mdrMap");
+            Map<String,Object> wxMap = (Map<String, Object>) resultMap.get("wxMap");
+            Map<String,Object> zMap = (Map<String, Object>) resultMap.get("zMap");
+            wxMap.put(stroeName,fz.setScale(2, BigDecimal.ROUND_HALF_UP));
+            zMap.put(stroeName,fm.add(fz).setScale(2, BigDecimal.ROUND_HALF_UP));
+            mdrMap.put(stroeName,fz.multiply(new BigDecimal(100)).divide(fm.add(fz), 2, BigDecimal.ROUND_HALF_UP));
             String[][] tableData2 = new String[newList.size() + 1][7];
             String[] tt = {"分店名称", "大类编码", "条码", "名称", "售价", "进货数量", "进货金额"};
 
@@ -271,6 +305,10 @@ public class TestSpringTask {
                 e.printStackTrace();
             }
         }
+
+
+        return resultMap;
+
     }
 
     public void creatTask(ChartData chartData) {
@@ -325,6 +363,59 @@ public class TestSpringTask {
 
     }
 
+    public void creatZxZbTask(Map<String, Object> resultMap) {
+        Map<String,Object> mdrMap = (Map<String, Object>) resultMap.get("mdrMap");
+        Map<String,Object> wxMap = (Map<String, Object>) resultMap.get("wxMap");
+        Map<String,Object> zMap = (Map<String, Object>) resultMap.get("zMap");
+        mdrMap=MapSortUtil.sortByValueDesc(mdrMap);
 
+        String[][] tableData2 = new String[mdrMap.size()+1][4];
+        String[] tt = {"门店名称","进货成本总金额","未动销商品成本金额","未动销商品占比"};
+        String[] categories = new String[mdrMap.size()];
+
+        int m = 0;
+        for (Map.Entry<String, Object> entry : mdrMap.entrySet()) {
+            categories[m]=entry.getKey();
+            m++;
+        }
+        DrawTableImgs cg = new DrawTableImgs();
+        try {
+            for (int i = 0; i < tt.length; i++) {
+                tableData2[0][i]=tt[i];
+            }
+
+            for (int i = 0; i < mdrMap.size(); i++) {
+                for (int j = 0; j < tt.length; j++) {
+                    switch(j){
+                        case 0:
+                            tableData2[i+1][j]=categories[i];break;
+                        case 1:
+                            tableData2[i+1][j]=zMap.get(categories[i])==null?0+"":zMap.get(categories[i])+"";
+                            break;
+                        case 2:
+                            tableData2[i+1][j]=wxMap.get(categories[i])==null?0+"":wxMap.get(categories[i])+"";
+                            break;
+                        case 3:
+                            tableData2[i+1][j]=mdrMap.get(categories[i])==null?0+"":mdrMap.get(categories[i])+"%";
+                            break;
+                        default:
+                            System.out.println("default");break;
+                    }
+
+
+
+                }
+            }
+
+            cg.myGraphicsGeneration(tableData2, creatPath("滞销商品占比报表"),"滞销商品占比报表");
+            RobotSendServiceImpl robot= new RobotSendServiceImpl();
+            robot.sendMsg(map.get("滞销商品占比报表").toString(),"滞销商品占比报表","请及时处理！");
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
 }
