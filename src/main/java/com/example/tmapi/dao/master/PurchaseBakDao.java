@@ -1,6 +1,6 @@
 package com.example.tmapi.dao.master;
 
-import com.example.tmapi.entity.Purchase;
+
 import com.example.tmapi.entity.PurchaseBak;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;

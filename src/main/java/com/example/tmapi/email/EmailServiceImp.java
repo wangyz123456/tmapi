@@ -12,10 +12,9 @@ import org.springframework.stereotype.Repository;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.File;
-import java.util.List;
+
 
 @Repository
 public class EmailServiceImp implements EmailService {

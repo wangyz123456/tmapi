@@ -1,0 +1,10 @@
+package com.example.tmapi.service;
+
+import com.example.tmapi.entity.PurchaseItemBak;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+public interface PurchaseItemBakService {
+    List<PurchaseItemBak> queryByDateTime(PurchaseItemBak purchaseItemBak);
+}

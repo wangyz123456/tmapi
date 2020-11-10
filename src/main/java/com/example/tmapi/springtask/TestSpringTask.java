@@ -3,13 +3,13 @@ package com.example.tmapi.springtask;
 import com.example.tmapi.chart.*;
 import com.example.tmapi.dao.slave.ContrastSaleDataDao;
 import com.example.tmapi.dao.slave.ContrastStoreSaleDataDao;
+import com.example.tmapi.dao.slave.StockRobotDao;
 import com.example.tmapi.email.EmailServiceImp;
 import com.example.tmapi.email.RobotSendServiceImpl;
-import com.example.tmapi.entity.ContrastSaleData;
-import com.example.tmapi.entity.ContrastStoreSaleData;
-import com.example.tmapi.entity.Items;
+import com.example.tmapi.entity.*;
 import com.example.tmapi.service.GoalSetService;
 import com.example.tmapi.service.ItemsService;
+import com.example.tmapi.service.PurchaseItemBakService;
 import com.example.tmapi.utils.ChartData;
 import com.example.tmapi.utils.DataUtil;
 import com.example.tmapi.utils.DrawTableImgs;
@@ -40,13 +40,18 @@ public class TestSpringTask {
     EmailServiceImp emailServiceImp;
     @Value("${spring.mail.touser}")
     private String user;
+    @Value("${serverUrl}")
+    private String serverUrl;
     @Autowired
     private ContrastSaleDataDao contrastSaleDataDao;
     @Autowired
     private ContrastStoreSaleDataDao contrastStoreSaleDataDao;
     @Autowired
     private ItemsService itemsService;
-
+    @Autowired
+    private PurchaseItemBakService purchaseItemBakService;
+    @Autowired
+    private StockRobotDao stockRobotDao;
     //共享资源
     static int count =0;
     /**
@@ -57,9 +62,34 @@ public class TestSpringTask {
     }
 
 
+    @Async
+//    @Scheduled(cron = "0 0 8,9,10,11,12,13,14,15,16,17,18,19,20,21 * * *")
+    @Scheduled(cron = "0 0/5 * * * *")
+    public void zxspxsTask(){
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @SneakyThrows
+            @Override
+            public void run() {
+                RobotSendServiceImpl robot= new RobotSendServiceImpl();
+                StockRobot stockRobot = new StockRobot();
+                List<StockRobot> urlList =  stockRobotDao.queryByCond(stockRobot);
+                Map<String,Object> urlMap = new HashMap<>();
+                for (StockRobot stockRobotDto:urlList) {
+                    urlMap.put(stockRobotDto.getStoreID(),stockRobotDto.getAddURL());
+                }
+                PurchaseItemBak dto = new PurchaseItemBak();
+                List<PurchaseItemBak> list = purchaseItemBakService.queryByDateTime(dto);
+                for (PurchaseItemBak purchaseItemBak:list) {
+                    robot.sendMsg(purchaseItemBak.toString(), urlMap.get(purchaseItemBak.getStoreId())+"");
+                }
+            }
+        });
+    }
+
 
     @Async
-    @Scheduled(cron = "0 0 21 * * ?")
+    @Scheduled(cron = "0 0 21 * * *")
     public void zxspTask(){
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -70,9 +100,6 @@ public class TestSpringTask {
                 List<Items> wList = (List<Items>) zxmap.get("resultWList");
                 List<Items> yList = (List<Items>) zxmap.get("resultYList");
                 String[] storeIds = {"070", "064", "065", "030", "121", "055", "003", "004", "005", "006", "007", "106", "008","118","329"};
-//                for (String storeID:storeIds) {
-//                    creatTaskZX(wList,storeID);
-//                }
                 Map<String,Object> resultMap = new HashMap<>();
                 Map<String,Object> mdrMap = new HashMap<>();
                 Map<String,Object> wxMap = new HashMap<>();
@@ -94,7 +121,7 @@ public class TestSpringTask {
 
 
     @Async
-    @Scheduled(cron = "0 30 21 * * ?")
+    @Scheduled(cron = "0 30 21 * * *")
     public void dsrwTask(){
         ChartData chartData = goalSetService.queryByDate("");
         map.clear();
@@ -124,17 +151,17 @@ public class TestSpringTask {
                     top = m.getKey();
                     break;
                 }
-                robot.sendMsg(map.get("今日总毛利达标率").toString(),"今日总毛利达标率","目前完成度最高的是:"+top+"\n");
+                robot.sendMsg(map.get("今日总毛利达标率").toString(),"今日总毛利达标率","目前完成度最高的是:"+top+"\n",serverUrl);
 
                 new ChartsMixedY().createMixedCharts(creatPath("月度零售对比曲线"),chartData);
 
                 new ChartsMixed().createMixedCharts(creatPath("门店零售同比"),chartData);
-                robot.sendMsg(map.get("门店零售同比").toString(),"门店零售同比","每天进步一点点！");
+                robot.sendMsg(map.get("门店零售同比").toString(),"门店零售同比","每天进步一点点！",serverUrl);
 
                 new ChartsMixedH().createMixedCharts(creatPath("门店零售环比"),chartData);
 
                 new BarChart3DChartH().createChart(creatPath("总毛利达标率"),chartData.getZmldblMap(),"总毛利达标率");
-                robot.sendMsg(map.get("总毛利达标率").toString(),"总毛利达标率","加油！必胜！");
+                robot.sendMsg(map.get("总毛利达标率").toString(),"总毛利达标率","加油！必胜！",serverUrl);
 
                 new BarChart3DChartHJMD().createChart(creatPath("加盟店业绩排名"),chartData,"加盟店业绩排名");
 
@@ -189,10 +216,10 @@ public class TestSpringTask {
             public void run() {
                 new ChartsMixed().createMixedCharts(creatPath("门店零售同比"),chartData);
                 RobotSendServiceImpl robot= new RobotSendServiceImpl();
-                robot.sendMsg(map.get("门店零售同比").toString(),"门店零售同比","每天进步一点点！");
+                robot.sendMsg(map.get("门店零售同比").toString(),"门店零售同比","每天进步一点点！",serverUrl);
 
                 new BarChart3DChartH().createChart(creatPath("总毛利达标率"),chartData.getZmldblMap(),"总毛利达标率");
-                robot.sendMsg(map.get("总毛利达标率").toString(),"总毛利达标率","加油！必胜！");
+                robot.sendMsg(map.get("总毛利达标率").toString(),"总毛利达标率","加油！必胜！",serverUrl);
 
                 new BarChart3DChartH().createChart(creatPath("今日总毛利达标率"),chartData.getTmldblMap(),"今日总毛利达标率");
                 String top ="";
@@ -200,7 +227,7 @@ public class TestSpringTask {
                     top = m.getKey();
                     break;
                 }
-                robot.sendMsg(map.get("今日总毛利达标率").toString(),"今日总毛利达标率","目前完成度最高的是:"+top+"\n");
+                robot.sendMsg(map.get("今日总毛利达标率").toString(),"今日总毛利达标率","目前完成度最高的是:"+top+"\n",serverUrl);
 
             }
         });
@@ -209,22 +236,19 @@ public class TestSpringTask {
     }
 
     public String creatPath(String s1){
-//        String ss = "D:\\echarts\\"+ new SimpleDateFormat("yyyyMMdd-HHmmssSSS").format(new Date())+".jpg";
         String ss = "E:\\PHPCUSTOM\\wwwroot\\ribaobiao\\dailyPic\\"+ new SimpleDateFormat("yyyyMMdd-HHmmssSSS").format(new Date())+".jpg";
         map.put(s1,ss);
          return ss;
     }
 
     public String delShuju(BigDecimal x,BigDecimal y){
-        String str = "0%";
-        if(x==null||y==null||x.equals(new BigDecimal(0))||y.equals(new BigDecimal(0))){
-            str = "0%";
-        }else {
-            str =x.multiply(new BigDecimal(100)).divide(y, 2, BigDecimal.ROUND_HALF_UP)+"%";
-        }
-        return str;
 
-        
+        if(x==null||y==null||x.equals(new BigDecimal(0))||y.equals(new BigDecimal(0))){
+            return "0%";
+        }else {
+            return x.multiply(new BigDecimal(100)).divide(y, 2, BigDecimal.ROUND_HALF_UP)+"%";
+        }
+
     }
 
 
@@ -299,7 +323,7 @@ public class TestSpringTask {
 
                 cg.myGraphicsGeneration(tableData2, creatPath(stroeName+"：15天未销售商品报表"),stroeName+"：15天未销售商品报表，进货日期："+DataUtil.format(DataUtil.addDay(DataUtil.getFormat(),-15)));
                 RobotSendServiceImpl robot= new RobotSendServiceImpl();
-                robot.sendMsg(map.get(stroeName+"：15天未销售商品报表").toString(),stroeName+"：15天未销售商品报表","请及时处理！");
+                robot.sendMsg(map.get(stroeName+"：15天未销售商品报表").toString(),stroeName+"：15天未销售商品报表","请及时处理！",serverUrl);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -407,9 +431,9 @@ public class TestSpringTask {
                 }
             }
 
-            cg.myGraphicsGeneration(tableData2, creatPath("滞销商品占比报表"),"滞销商品占比报表");
+            cg.myGraphicsGeneration(tableData2, creatPath("滞销商品占比报表"),"滞销商品占比报表，进货确认日期："+DataUtil.format(DataUtil.addDay(DataUtil.getFormat(),-15)));
             RobotSendServiceImpl robot= new RobotSendServiceImpl();
-            robot.sendMsg(map.get("滞销商品占比报表").toString(),"滞销商品占比报表","请及时处理！");
+            robot.sendMsg(map.get("滞销商品占比报表").toString(),"滞销商品占比报表","请及时处理！",serverUrl);
 
 
         } catch (Exception e) {

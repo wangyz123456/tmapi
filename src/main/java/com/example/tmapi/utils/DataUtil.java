@@ -441,6 +441,11 @@ public class DataUtil {
         int day = cal.get(Calendar.DATE);
         return day;
     }
+    public static int getHour(){
+        Calendar cal = Calendar.getInstance();
+        int hour = cal.get(Calendar.HOUR_OF_DAY);
+        return hour;
+    }
 
     /**
            * 获取当月的 天数

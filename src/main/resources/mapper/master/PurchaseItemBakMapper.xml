@@ -63,4 +63,33 @@
         GROUP BY StoreID,GoodsID
     </select>
 
+
+    <select id="queryByDateTime"  resultType="com.example.tmapi.entity.PurchaseItemBak" parameterType="com.example.tmapi.entity.PurchaseItemBak">
+       SELECT
+            i.StoreID,
+            s.StoreName as StoreName,
+            i.GoodsID,
+            LEFT(g.Name,8)as Name,
+            i.SellerID,
+            i.Qty,
+            i.Price,
+            i.Amount,
+            i.BuyDate,
+            p.BuyTime as BuyTime
+        FROM
+            PurchaseItemBak i,
+            PurchaseBak p,
+            Goods g,
+            Stores s
+        where i.StoreID = p.StoreID
+         and i.BuyDate = p.BuyDate
+        and i.MachID = p.MachID
+        and i.ReceiptID = p.ReceiptID
+        and i.Qty>0
+        and i.StoreID = s.StoreID
+        and i.GoodsID = g.GoodsID
+        and p.BuyDate= #{purchaseItemBak.startDate}
+        and p.BuyTime >= #{purchaseItemBak.startTime}
+        ORDER BY i.StoreID
+    </select>
 </mapper>
