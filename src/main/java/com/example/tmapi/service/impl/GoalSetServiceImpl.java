@@ -83,8 +83,8 @@ public class GoalSetServiceImpl implements GoalSetService {
         List<PurchaseItemBak> purchaseItemBakList = purchaseItemBakDao.queryByStoreId(purchaseItemBak);
         //查询方山餐饮月初到当天前一天的总销售额，总成本，总毛利
         PurchaseItem fscy = new PurchaseItem();
-        fscy.setStoreID("118");
-        fscy.setSellerID("餐饮");
+        fscy.setStoreId("118");
+        fscy.setSellerId("餐饮");
         fscy.setStartDate(sdate);
         List<PurchaseItem> fscypurchaseItemlist = purchaseItemDao.queryFsAmount(fscy);
         PurchaseItem fsPurchaseItem = new PurchaseItem();
@@ -96,7 +96,7 @@ public class GoalSetServiceImpl implements GoalSetService {
         //查询方山餐饮当天的总销售额，总成本，总毛利
         PurchaseItemBak fs = new PurchaseItemBak();
         fs.setStoreId("118");
-        fs.setSellerID("餐饮");
+        fs.setSellerId("餐饮");
         fs.setStartDate(startDate);
         List<PurchaseItemBak> fsPurchaseItemList = purchaseItemBakDao.queryByStoreId(fs);
         PurchaseItemBak fsPurchaseItemBak = new PurchaseItemBak();
@@ -244,7 +244,7 @@ public class GoalSetServiceImpl implements GoalSetService {
              }
              else{
                  for(RPTBase0006B rPTBase0006B:listDto){
-                     if(goalSet.getStoreId().equals(rPTBase0006B.getStoreID())){
+                     if(goalSet.getStoreId().equals(rPTBase0006B.getStoreId())){
                            if(goalSet.getStoreId().equals("118")){
                                if(fsPurchaseItem!=null)
                                   fz = rPTBase0006B.getSumProfit().subtract(fsPurchaseItem.getSumProfit());
@@ -309,7 +309,7 @@ public class GoalSetServiceImpl implements GoalSetService {
                  }
 
                  for (ClientPurItem clientPurItemDto:clientPurItemList) {
-                     if(goalSet.getStoreId().equals(clientPurItemDto.getStoreID())){
+                     if(goalSet.getStoreId().equals(clientPurItemDto.getStoreId())){
                          fz.add(clientPurItemDto.getSumProfit());
                          tsummlfz = tsummlfz.add(clientPurItemDto.getSumProfit());
                          zxstfz = zxstfz.add(clientPurItemDto.getTotalAmount());
@@ -520,7 +520,7 @@ public class GoalSetServiceImpl implements GoalSetService {
         List<Member> memList = memberDao.queryNewMember(mem);
         for (GoalSet dto:list) {
             for (Member memDto:memList) {
-                if(dto.getStoreId().equals(memDto.getStoreID())){
+                if(dto.getStoreId().equals(memDto.getStoreId())){
                     map.put(dto.getPrimarySector(),memDto.getNewMember());
                     break;
                 }
@@ -536,7 +536,7 @@ public class GoalSetServiceImpl implements GoalSetService {
         List<Member> memList = memberDao.querySumMember();
         for (GoalSet dto:list) {
             for (Member memDto:memList) {
-                if(dto.getStoreId().equals(memDto.getStoreID())){
+                if(dto.getStoreId().equals(memDto.getStoreId())){
                     map.put(dto.getPrimarySector(),memDto.getSumNo());
                     break;
                 }

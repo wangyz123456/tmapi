@@ -8,15 +8,15 @@ import java.util.Date;
 
 @Data
 public class Items implements Serializable {
-    private String StoreID;
-    private int  ReceiptID;
-    private int GoodsID;
-    private BigDecimal RecQty;
+    private String storeId;
+    private int  receiptId;
+    private int goodsId;
+    private BigDecimal recQty;
     private Date date;
-    private String StoreName;
-    private String Name;
-    private String KindCode;
-    private BigDecimal CBAmount;
-    private String BarCode;
-    private BigDecimal Price;
+    private String storeName;
+    private String name;
+    private String kindCode;
+    private BigDecimal cBAmount;
+    private String barCode;
+    private BigDecimal price;
 }

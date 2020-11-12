@@ -7,9 +7,9 @@
 
     <select id="queryByCond" resultType="com.example.tmapi.entity.RPTBase0006B">
        SELECT
-            StoreID,
-            SUM (TotalAmount) AS TotalAmount,
-            SUM (SaleCost) AS SaleCost,
+            StoreID as storeId,
+            SUM (TotalAmount) AS totalAmount,
+            SUM (SaleCost) AS saleCost,
             sum(TotalAmount - SaleCost) as sumProfit
         FROM
             RPT_Base0006B

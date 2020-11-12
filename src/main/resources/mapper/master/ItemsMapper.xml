@@ -7,9 +7,9 @@
 
     <select id="queryByCond" resultType="com.example.tmapi.entity.Items" parameterType="com.example.tmapi.entity.Items">
         SELECT
-            i.StoreID as StoreID,
-            i.ReceiptID as ReceiptID,
-            i.GoodsID as GoodsID,
+            i.StoreID as storeId,
+            i.ReceiptID as receiptId,
+            i.GoodsID as goodsId,
             SUM (i.RecQty) AS qty
         FROM
             Items i
@@ -20,7 +20,7 @@
             FROM
                 Manifest
             WHERE
-                OrdDate >= #{items.OrdDate}
+                OrdDate >= #{items.ordDate}
             GROUP BY
                 StoreID,
                 ReceiptID
@@ -37,15 +37,15 @@
 
     <select id="queryByDate" resultType="com.example.tmapi.entity.Items" parameterType="com.example.tmapi.entity.Items">
         SELECT
-            i.StoreID,
-            s.StoreName as StoreName,
-            i.GoodsID,
-			left(g.KindCode,2) as KindCode,
-			g.BarCode as BarCode,
-            left(g.Name,8) as Name,
-            g.Price as Price,
-            sum(i.RecQty) as RecQty,
-          sum(i.RecQty*i.BuyPrice) as CBAmount
+            i.StoreID as storeId,
+            s.StoreName as storeName,
+            i.GoodsID as goodsId,
+			left(g.KindCode,2) as kindCode,
+			g.BarCode as barCode,
+            left(g.Name,8) as name,
+            g.Price as price,
+            sum(i.RecQty) as recQty,
+          sum(i.RecQty*i.BuyPrice) as cBAmount
         FROM
             Items i,
             Manifest m,
@@ -69,8 +69,9 @@
             i.GoodsID,
             g.Name ,
             g.KindCode,
-						g.BarCode,g.Price
-        ORDER BY i.StoreID asc ,G.KindCode asc  ,CBAmount desc
+			g.BarCode,
+			g.Price
+        ORDER BY i.StoreID asc ,g.KindCode asc  ,cBAmount desc
 
     </select>
 

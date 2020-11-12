@@ -32,9 +32,9 @@ public class PurchaseServiceImpl implements PurchaseService {
         if(list!=null && list.size()>0) {
             for (Purchase dto : list) {
                 PurchaseItem purchaseItem = new PurchaseItem();
-                purchaseItem.setMachId(dto.getMachID());
-                purchaseItem.setStoreID(dto.getStoreId());
-                purchaseItem.setReceiptID(dto.getReceiptId());
+                purchaseItem.setMachId(dto.getMachId());
+                purchaseItem.setStoreId(dto.getStoreId());
+                purchaseItem.setReceiptId(dto.getReceiptId());
                 purchaseItem.setBuyDate(dto.getBuyDate());
                  List<PurchaseItem> listItem = purchaseItemDao.queryByCond(purchaseItem);
                 if (listItem != null && listItem.size() > 0) {

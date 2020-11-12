@@ -5,21 +5,21 @@
      <select id="querySumAmountByStoreId" resultType="com.example.tmapi.entity.PurchaseBak" parameterType="com.example.tmapi.entity.PurchaseBak">
         SELECT
 
-            SUM(p.Amount) as TodaySumAmount,
-            sum(p.Qty * p.StockPrice) as SaleCost,
+            SUM(p.Amount) as todaySumAmount,
+            sum(p.Qty * p.StockPrice) as saleCost,
             sum(p.Amount-p.Qty * p.StockPrice) as sumProfit
 
         FROM
             PurchaseItemBak p left join  PurchaseBak b
          on p.BuyDate = b.BuyDate and p.StoreID = b.StoreID and p.MachID = b.MachID and p.ReceiptID = b.ReceiptID
         WHERE 1=1
-         <if test="purchaseBak.StoreId != null">
-             and b.StoreID = #{purchaseBak.StoreId}
+         <if test="purchaseBak.storeId != null">
+             and b.StoreID = #{purchaseBak.storeId}
          </if>
          and
-         ( b.BuyDate = #{purchaseBak.BuyDate}
-         and  b.BuyTime >= #{purchaseBak.BuyTime}
-         or   b.BuyDate > #{purchaseBak.BuyDate})
+         ( b.BuyDate = #{purchaseBak.buyDate}
+         and  b.BuyTime >= #{purchaseBak.buyTime}
+         or   b.BuyDate > #{purchaseBak.buyDate})
 
 
     </select>
@@ -27,13 +27,13 @@
 
     <select id="queryCustomNoAndAmt" resultType="com.example.tmapi.entity.PurchaseBak" parameterType="com.example.tmapi.entity.PurchaseBak">
         SELECT
-        StoreID,
-        SUM (TotalAmount) AS AMT,
-        COUNT (DISTINCT(CardID)) AS HYS
+        StoreID as storeId,
+        SUM (TotalAmount) AS aMT,
+        COUNT (DISTINCT(CardID)) AS hYS
         FROM
         Purchasebak
         WHERE
-        BuyDate = #{purchaseBak.BuyDate}
+        BuyDate = #{purchaseBak.buyDate}
         AND CardID !=''
         and CardID is not null
         GROUP BY

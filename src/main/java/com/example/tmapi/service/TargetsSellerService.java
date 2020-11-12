@@ -8,6 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface TargetsSellerService {
-    Map<String,Object> queryTargetsSellerByCond(String StoreID, String SellerID);
+    Map<String,Object> queryTargetsSellerByCond(String storeId, String sellerId);
 
 }

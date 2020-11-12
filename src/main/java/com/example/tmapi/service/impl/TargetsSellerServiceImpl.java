@@ -30,18 +30,18 @@ public class TargetsSellerServiceImpl implements TargetsSellerService {
 
     /**
      * 查询店员销售业绩，以及销售金额
-     * @param StoreID  StoreID
-     * @param SellerID SellerID
+     * @param storeId  storeId
+     * @param sellerId sellerId
      * @return map
      */
     @Override
-    public Map<String,Object> queryTargetsSellerByCond(String StoreID,String SellerID) {
+    public Map<String,Object> queryTargetsSellerByCond(String storeId,String sellerId) {
         Map<String,Object> map = new HashMap<>();
         Purchase purchase = new Purchase();
         PurchaseItemBak purchaseBak = new PurchaseItemBak();
         TargetsSeller targetsSeller = new TargetsSeller();
-        targetsSeller.setStoreID(StoreID);
-        targetsSeller.setSellerID(SellerID);
+        targetsSeller.setStoreId(storeId);
+        targetsSeller.setSellerId(sellerId);
         Date dNow = new Date( );
         SimpleDateFormat ft = new SimpleDateFormat ("yyyyMM");
         //查询当月销售目标
@@ -50,13 +50,13 @@ public class TargetsSellerServiceImpl implements TargetsSellerService {
         TargetsSeller targetsSellerDto = targetsSellerDao.queryTargetsSellerByCond(targetsSeller);
 
         //查询当月第一天到当天前一天销售业绩
-        purchase.setStoreId(StoreID);
-        purchase.setSellerID(SellerID);
+        purchase.setStoreId(storeId);
+        purchase.setSellerId(sellerId);
         purchase.setStartDate(DataUtil.initDateByMonth());
         Purchase purchaseDto = purchaseItemDao.querySumAmountById(purchase);
         //查询当天销售额
-        purchaseBak.setStoreId(StoreID);
-        purchaseBak.setSellerID(SellerID);
+        purchaseBak.setStoreId(storeId);
+        purchaseBak.setSellerId(sellerId);
         purchaseBak.setStartDate(DataUtil.initToDayDateByMonth());
         PurchaseItemBak  purchaseBakDto = purchaseItemBakDao.querySumAmountTodayById(purchaseBak);
         //封装返回参数

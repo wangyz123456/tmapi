@@ -63,8 +63,7 @@ public class TestSpringTask {
 
 
     @Async
-//    @Scheduled(cron = "0 0 8,9,10,11,12,13,14,15,16,17,18,19,20,21 * * *")
-    @Scheduled(cron = "0 0/5 * * * *")
+    @Scheduled(cron = "0 0 8,9,10,11,12,13,14,15,16,17,18,19,20,21 * * *")
     public void zxspxsTask(){
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -76,12 +75,13 @@ public class TestSpringTask {
                 List<StockRobot> urlList =  stockRobotDao.queryByCond(stockRobot);
                 Map<String,Object> urlMap = new HashMap<>();
                 for (StockRobot stockRobotDto:urlList) {
-                    urlMap.put(stockRobotDto.getStoreID(),stockRobotDto.getAddURL());
+                    urlMap.put(stockRobotDto.getStoreId(),stockRobotDto.getAddURL());
                 }
                 PurchaseItemBak dto = new PurchaseItemBak();
                 List<PurchaseItemBak> list = purchaseItemBakService.queryByDateTime(dto);
                 for (PurchaseItemBak purchaseItemBak:list) {
                     robot.sendMsg(purchaseItemBak.toString(), urlMap.get(purchaseItemBak.getStoreId())+"");
+
                 }
             }
         });
@@ -235,12 +235,20 @@ public class TestSpringTask {
 
     }
 
+    /**
+     * 保存生成图片路径
+     * @param s1 s1
+     * @return ss
+     */
     public String creatPath(String s1){
         String ss = "E:\\PHPCUSTOM\\wwwroot\\ribaobiao\\dailyPic\\"+ new SimpleDateFormat("yyyyMMdd-HHmmssSSS").format(new Date())+".jpg";
         map.put(s1,ss);
          return ss;
     }
 
+    /**
+     * 处理数据
+     */
     public String delShuju(BigDecimal x,BigDecimal y){
 
         if(x==null||y==null||x.equals(new BigDecimal(0))||y.equals(new BigDecimal(0))){
@@ -252,6 +260,14 @@ public class TestSpringTask {
     }
 
 
+    /**
+     * 生成滞销表单
+     * @param list list
+     * @param storeId storeId
+     * @param ylist ylist
+     * @param resultMap resultMap
+     * @return map
+     */
     public Map<String,Object> creatTaskZX(List<Items> list,String storeId,List<Items> ylist,Map<String,Object> resultMap) {
         List<Items> newList = new ArrayList<>();
         String stroeName = "";
@@ -259,7 +275,7 @@ public class TestSpringTask {
         BigDecimal fm = new BigDecimal(0);
 
         for (Items items:list) {
-            if(storeId.equals(items.getStoreID())){
+            if(storeId.equals(items.getStoreId())){
                 newList.add(items);
                 fz = fz.add(items.getCBAmount());
                 stroeName = items.getStoreName();
@@ -268,7 +284,7 @@ public class TestSpringTask {
         }
 
         for (Items items:ylist) {
-            if(storeId.equals(items.getStoreID())){
+            if(storeId.equals(items.getStoreId())){
               fm =  fm.add(items.getCBAmount());
             }
         }
@@ -335,6 +351,10 @@ public class TestSpringTask {
 
     }
 
+    /**
+     * 生成会员表单
+     * @param chartData  chartData
+     */
     public void creatTask(ChartData chartData) {
                 String[][] tableData2 = new String[chartData.getMdljhysMap().size()+1][6];
                 String[] tt = {"门店名称","门店累计会员数","今日新增会员数","今日消费会员数","今日会员客单价","今日会员消费占比"};
@@ -387,6 +407,10 @@ public class TestSpringTask {
 
     }
 
+    /**
+     * 生成滞销占比表单
+     * @param resultMap
+     */
     public void creatZxZbTask(Map<String, Object> resultMap) {
         Map<String,Object> mdrMap = (Map<String, Object>) resultMap.get("mdrMap");
         Map<String,Object> wxMap = (Map<String, Object>) resultMap.get("wxMap");

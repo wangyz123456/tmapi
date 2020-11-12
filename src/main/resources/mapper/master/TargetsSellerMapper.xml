@@ -8,14 +8,14 @@
     <select id="queryTargetsSellerByCond" resultType="com.example.tmapi.entity.TargetsSeller" parameterType="com.example.tmapi.entity.TargetsSeller">
         select Goals from TargetsSeller
         WHERE 1=1
-        <if test="targetsSeller.StoreID != null">
-            and StoreID = #{targetsSeller.StoreID}
+        <if test="targetsSeller.storeId != null">
+            and StoreID = #{targetsSeller.storeId}
         </if>
-        <if test="targetsSeller.SellerID != null">
-            and SellerID = #{targetsSeller.SellerID}
+        <if test="targetsSeller.sellerId != null">
+            and SellerID = #{targetsSeller.sellerId}
         </if>
-        <if test="targetsSeller.Date != null">
-            and Date = #{targetsSeller.Date}
+        <if test="targetsSeller.date != null">
+            and Date = #{targetsSeller.date}
         </if>
 
     </select>

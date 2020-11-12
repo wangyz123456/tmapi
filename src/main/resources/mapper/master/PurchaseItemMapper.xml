@@ -2,64 +2,64 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.tmapi.dao.master.PurchaseItemDao">
     <resultMap id="BaseResultMap" type="com.example.tmapi.entity.PurchaseItem" >
-        <result column="BuyDate" property="BuyDate" jdbcType="DATE" />
-        <result column="StoreId" property="StoreId" jdbcType="VARCHAR" />
-        <result column="MachID" property="MachID" jdbcType="VARCHAR" />
-        <result column="ReceiptId" property="ReceiptId" jdbcType="INTEGER" />
-        <result column="SN" property="SN" jdbcType="SMALLINT" />
-        <result column="GoodsID" property="GoodsID" jdbcType="INTEGER" />
-        <result column="Qty" property="Qty" jdbcType="DECIMAL" />
-        <result column="Price" property="Price" jdbcType="DECIMAL" />
-        <result column="Amount" property="TotalAmount" jdbcType="DECIMAL" />
+        <result column="BuyDate" property="buyDate" jdbcType="DATE" />
+        <result column="StoreId" property="storeId" jdbcType="VARCHAR" />
+        <result column="MachID" property="machId" jdbcType="VARCHAR" />
+        <result column="ReceiptId" property="receiptId" jdbcType="INTEGER" />
+        <result column="SN" property="sN" jdbcType="SMALLINT" />
+        <result column="GoodsID" property="goodsId" jdbcType="INTEGER" />
+        <result column="Qty" property="qty" jdbcType="DECIMAL" />
+        <result column="Price" property="price" jdbcType="DECIMAL" />
+        <result column="Amount" property="totalAmount" jdbcType="DECIMAL" />
     </resultMap>
 
     <select id="queryByCond" resultType="com.example.tmapi.entity.PurchaseItem" parameterType="com.example.tmapi.entity.PurchaseItem" >
         SELECT
-            p.ReceiptID,
-            p.BuyDate,
-            p.StoreID,
-            p.MachId,
-            s.StoreName,
-            p.GoodsID,
-            g.Name,
-            g.BarCode,
-            p.Qty,
-            p.Price,
-            p.Amount
+            p.ReceiptID as receiptId,
+            p.BuyDate as buyDate,
+            p.StoreID as storeId,
+            p.MachId as machId,
+            s.StoreName as storeName,
+            p.GoodsID as goodsId,
+            g.Name as name,
+            g.BarCode as barCode,
+            p.Qty as qty,
+            p.Price as price,
+            p.Amount as amount
         FROM
             PurchaseItem p
         LEFT JOIN Stores s ON p.StoreId = s.StoreId
         LEFT JOIN Goods g ON p.GoodsID = g.GoodsID
         WHERE 1=1
-        <if test="purchaseItem.ReceiptID != null">
-            and p.ReceiptID = #{purchaseItem.ReceiptID}
+        <if test="purchaseItem.receiptId != null">
+            and p.ReceiptID = #{purchaseItem.receiptId}
         </if>
-        <if test="purchaseItem.StoreID != null">
-            and p.StoreID = #{purchaseItem.StoreID}
+        <if test="purchaseItem.storeId != null">
+            and p.StoreID = #{purchaseItem.storeId}
         </if>
-        <if test="purchaseItem.MachId != null">
-            and p.MachId = #{purchaseItem.MachId}
+        <if test="purchaseItem.machId != null">
+            and p.MachId = #{purchaseItem.machId}
         </if>
-        <if test="purchaseItem.BuyDate != null">
-            and p.BuyDate = #{purchaseItem.BuyDate}
+        <if test="purchaseItem.buyDate != null">
+            and p.BuyDate = #{purchaseItem.buyDate}
         </if>
     </select>
 
     <select id="querySumAmountById" resultType="com.example.tmapi.entity.Purchase" parameterType="com.example.tmapi.entity.Purchase" >
-        SELECT SUM (Amount) SumAmount
+        SELECT SUM (Amount) as sumAmount
         FROM
         purchaseItem p
         LEFT JOIN POSSeller s ON p.SellerID = s.SellerName
         WHERE
         1 = 1
-        <if test="purchase.StoreId != null">
-            and p.StoreId = #{purchase.StoreId}
+        <if test="purchase.storeId != null">
+            and p.StoreId = #{purchase.storeId}
         </if>
-        <if test="purchase.StoreId != null">
-            and s.StoreId = #{purchase.StoreId}
+        <if test="purchase.storeId != null">
+            and s.StoreId = #{purchase.storeId}
         </if>
-        <if test="purchase.SellerID != null">
-            and s.SellerID = #{purchase.SellerID}
+        <if test="purchase.sellerId != null">
+            and s.SellerID = #{purchase.sellerId}
         </if>
         <if test="purchase.startDate != null">
             and p.BuyDate >= #{purchase.startDate}
@@ -70,9 +70,9 @@
 
     <select id="queryFsAmount" resultType="com.example.tmapi.entity.PurchaseItem" parameterType="com.example.tmapi.entity.PurchaseItem">
         SELECT
-        StoreId,
-        SUM(Amount) as TodaySumAmount,
-        sum(Qty * StockPrice) as SaleCost,
+        StoreId as storeId,
+        SUM(Amount) as todaySumAmount,
+        sum(Qty * StockPrice) as saleCost,
         sum(Amount-Qty * StockPrice) as sumProfit
 
         FROM
@@ -81,11 +81,11 @@
         <if test="purchaseItem.startDate != null">
             and  BuyDate >= #{purchaseItem.startDate}
         </if>
-        <if test="purchaseItem.StoreID != null">
-            and StoreID = #{purchaseItem.StoreID}
+        <if test="purchaseItem.storeId != null">
+            and StoreID = #{purchaseItem.storeId}
         </if>
-        <if test="purchaseItem.SellerID != null">
-            and  SellerID = #{purchaseItem.SellerID}
+        <if test="purchaseItem.sellerId != null">
+            and  SellerID = #{purchaseItem.sellerId}
         </if>
         GROUP BY
         StoreID

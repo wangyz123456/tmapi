@@ -7,7 +7,7 @@ import java.io.Serializable;
 @Data
 public class StockRobot implements Serializable {
 
-    private String storeID;
+    private String storeId;
     private String addURL;
     private String minusURL;
 

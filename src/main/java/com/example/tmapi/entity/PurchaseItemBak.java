@@ -9,25 +9,26 @@ import java.util.Date;
 @Data
 public class PurchaseItemBak implements Serializable {
 
-    private Date BuyDate;
-    private String StoreId;
-    private String StoreName;
-    private String MachID;
-    private int ReceiptId;
-    private String BuyTime;
-    private BigDecimal MemberId;
-    private String CardID;
-    private BigDecimal TotalAmount;
-    private BigDecimal Amount;
-    private BigDecimal Price;
-    private String SellerID;
-    private int GoodsID;
-    private String Name;
+    private Date buyDate;
+    private String storeId;
+    private String storeName;
+    private String machId;
+    private int receiptId;
+    private String buyTime;
+    private BigDecimal memberId;
+    private String cardId;
+    private BigDecimal totalAmount;
+    private BigDecimal amount;
+    private BigDecimal oldPrice;
+    private BigDecimal price;
+    private String sellerId;
+    private int goodsId;
+    private String name;
     private BigDecimal qty;
     //总销售额
-    private BigDecimal TodaySumAmount;
+    private BigDecimal todaySumAmount;
     //总成本
-    private BigDecimal SaleCost;
+    private BigDecimal saleCost;
     //总利润
     private BigDecimal sumProfit;
     private Date startDate;
@@ -38,7 +39,7 @@ public class PurchaseItemBak implements Serializable {
 
     @Override
     public String toString() {
-        return  StoreName +"：" + SellerID +","+DataUtil.format(BuyDate,"yyyy-MM-dd")+"日,"  + BuyTime + "点,卖出："+ qty +"个"  + Name + ", 价格：" + Price +
-                "元， 总金额：" + Amount +"元， 进货日期：" + DataUtil.format(lastInDate,"yyyy-MM-dd") ;
+        return  storeName +"：" + sellerId +","+DataUtil.format(buyDate,"yyyy-MM-dd")+"日,"  + buyTime + "点,卖出："+ qty +"个"  + name + ", 原价：" + oldPrice + ", 售价：" + price +
+                "元， 总金额：" + amount +"元， 最后进货日期：" + DataUtil.format(lastInDate,"yyyy-MM-dd") ;
     }
 }

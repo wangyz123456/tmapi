@@ -11,8 +11,8 @@
 
     <select id="queryNewMember" resultType="com.example.tmapi.entity.Member" parameterType="com.example.tmapi.entity.Member">
         SELECT
-            StoreID,
-            COUNT (cardid) AS NewMember
+            StoreID as storeId,
+            COUNT (cardid) AS newMember
         FROM
             Member
         WHERE
@@ -24,7 +24,7 @@
 
     <select id="querySumMember" resultType="com.example.tmapi.entity.Member" >
         SELECT
-        StoreID,
+        StoreID as storeId,
         COUNT (MemberID) AS sumNo
         FROM
         Member

@@ -7,16 +7,16 @@ import java.math.BigDecimal;
 import java.util.Date;
 @Data
 public class ClientPurItem implements Serializable {
-    private String StoreID;
-    private String SheetID;
-    private BigDecimal SalePrice;
-    private BigDecimal StockPrice;
-    private BigDecimal SendQty;
+    private String storeId;
+    private String sheetId;
+    private BigDecimal salePrice;
+    private BigDecimal stockPrice;
+    private BigDecimal sendQty;
 
     //总金额
-    private BigDecimal TotalAmount;
+    private BigDecimal totalAmount;
     //总成本
-    private BigDecimal SaleCost;
+    private BigDecimal saleCost;
     //总利润
     private BigDecimal sumProfit;
     private Date startDate;

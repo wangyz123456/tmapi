@@ -9,14 +9,14 @@ import java.util.Date;
 
 @Data
 public class Member implements Serializable {
-    private BigDecimal MemberID;
-    private String CardID;
-    private String StoreID;
-    private String FirstName;
-    private String MobileNO;
-    private String Sex;
-    private Date BirthDay;
-    private BigDecimal NewMember;
+    private BigDecimal memberId;
+    private String cardId;
+    private String storeId;
+    private String firstName;
+    private String mobileNO;
+    private String sex;
+    private Date birthDay;
+    private BigDecimal newMember;
     private BigDecimal sumNo;
     private Date startDate;
     private Date endDate;

@@ -2,38 +2,38 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.tmapi.dao.master.PurchaseDao">
     <resultMap id="BaseResultMap" type="com.example.tmapi.entity.Purchase" >
-        <result column="BuyDate" property="BuyDate" jdbcType="DATE" />
-        <result column="StoreId" property="StoreId" jdbcType="VARCHAR" />
-        <result column="MachID" property="MachID" jdbcType="VARCHAR" />
-        <result column="ReceiptId" property="ReceiptId" jdbcType="INTEGER" />
-        <result column="BuyTime" property="BuyTime" jdbcType="VARCHAR" />
-        <result column="MemberId" property="MemberId" jdbcType="DECIMAL" />
-        <result column="CardID" property="CardID" jdbcType="VARCHAR" />
-        <result column="TotalAmount" property="TotalAmount" jdbcType="DECIMAL" />
+        <result column="BuyDate" property="buyDate" jdbcType="DATE" />
+        <result column="StoreId" property="storeId" jdbcType="VARCHAR" />
+        <result column="MachID" property="machId" jdbcType="VARCHAR" />
+        <result column="ReceiptId" property="receiptId" jdbcType="INTEGER" />
+        <result column="BuyTime" property="buyTime" jdbcType="VARCHAR" />
+        <result column="MemberId" property="memberId" jdbcType="DECIMAL" />
+        <result column="CardID" property="cardId" jdbcType="VARCHAR" />
+        <result column="TotalAmount" property="totalAmount" jdbcType="DECIMAL" />
     </resultMap>
 
     <select id="queryByTel" resultType="com.example.tmapi.entity.Purchase" parameterType="com.example.tmapi.entity.Purchase" >
         SELECT
-            p.ReceiptId,
-            p.BuyDate,
-            p.BuyTime,
-            p.MachID,
-            p.StoreId,
-            p.CardID,
-            s.StoreName,
-            p.TotalAmount
+            p.ReceiptId as receiptId,
+            p.BuyDate as buyDate,
+            p.BuyTime as buyTime,
+            p.MachID as machId,
+            p.StoreId as storeId,
+            p.CardID as cardId,
+            s.StoreName as storeName,
+            p.TotalAmount as totalAmount
         FROM
             purchase p
         LEFT JOIN Stores s ON p.StoreId = s.StoreId
         WHERE 1=1
-        and p.BuyDate >= #{purchase.BuyDate}
+        and p.BuyDate >= #{purchase.buyDate}
         and p.CardID IN (
                 SELECT
                     CardID
                 FROM
                     member
                 WHERE
-                    MobileNO = #{purchase.Tel}
+                    MobileNO = #{purchase.tel}
             )
         ORDER BY BuyDate DESC
     </select>

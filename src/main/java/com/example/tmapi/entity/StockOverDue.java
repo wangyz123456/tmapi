@@ -8,8 +8,8 @@ import java.util.Date;
 @Data
 public class StockOverDue implements Serializable {
 
-    private String storeID;
-    private int goodsID;
+    private String storeId;
+    private int goodsId;
     private Date maxinDate;
 
 }

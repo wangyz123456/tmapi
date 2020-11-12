@@ -32,8 +32,8 @@ public class PurchaseItemBakServiceImpl implements PurchaseItemBakService {
         List<StockOverDue> sList = stockOverDueDao.queryByCond(sdto);
         for (PurchaseItemBak purchaseItemBakDto:list) {
             for (StockOverDue stockOverDue:sList) {
-                if(purchaseItemBakDto.getStoreId().equals(stockOverDue.getStoreID())&&
-                        purchaseItemBakDto.getGoodsID()==stockOverDue.getGoodsID()){
+                if(purchaseItemBakDto.getStoreId().equals(stockOverDue.getStoreId())&&
+                        purchaseItemBakDto.getGoodsId()==stockOverDue.getGoodsId()){
                     purchaseItemBakDto.setLastInDate(stockOverDue.getMaxinDate());
                     rusultList.add(purchaseItemBakDto);
                     break;

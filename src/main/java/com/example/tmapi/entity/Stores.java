@@ -7,7 +7,7 @@ import java.io.Serializable;
 @Data
 public class Stores implements Serializable {
 
-    private String StoreID;
-    private String StoreName;
+    private String storeId;
+    private String storeName;
 
 }

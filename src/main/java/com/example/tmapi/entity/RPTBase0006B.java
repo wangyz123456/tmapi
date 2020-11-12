@@ -8,13 +8,13 @@ import java.util.Date;
 @Data
 public class RPTBase0006B implements Serializable {
 
-    private Date RunDate;
-    private String StoreID;
-    private String KindCode;
+    private Date runDate;
+    private String storeId;
+    private String kindCode;
     //总金额
-    private BigDecimal TotalAmount;
+    private BigDecimal totalAmount;
     //总成本
-    private BigDecimal SaleCost;
+    private BigDecimal saleCost;
     //总利润
     private BigDecimal sumProfit;
 

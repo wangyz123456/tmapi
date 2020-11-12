@@ -7,9 +7,9 @@
 
     <select id="queryByCond" resultType="com.example.tmapi.entity.ClientPurItem" parameterType="com.example.tmapi.entity.ClientPurItem">
         SELECT
-            ci.StoreID,
-            SUM (ci.SalePrice * ci.SendQty) AS TotalAmount ,
-        SUM (ci.StockPrice * ci.SendQty) AS SaleCost ,
+            ci.StoreID as storeId,
+            SUM (ci.SalePrice * ci.SendQty) AS totalAmount ,
+        SUM (ci.StockPrice * ci.SendQty) AS saleCost ,
         SUM (ci.SalePrice * ci.SendQty - ci.StockPrice * ci.SendQty) AS sumProfit
         FROM
             ClientPurItem ci

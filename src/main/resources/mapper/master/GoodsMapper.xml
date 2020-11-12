@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.tmapi.dao.master.GoodsDao">
+    <resultMap id="BaseResultMap" type="com.example.tmapi.entity.Goods" >
+        <result column="GoodsID" property="goodsId" jdbcType="INTEGER" />
+        <result column="Name" property="name" jdbcType="VARCHAR" />
+        <result column="BarCode" property="barCode" jdbcType="VARCHAR" />
+    </resultMap>
+
+
+    <select id="queryByCond" resultMap="BaseResultMap" parameterType="com.example.tmapi.entity.Goods" >
+        SELECT
+        GoodsID as goodsId,
+        Name as name,
+        BarCode as barCode
+
+        FROM
+            Goods
+
+        WHERE 1=1
+        <if test="goods.goodsId != null and goods.goodsId !=0">
+            and GoodsID = #{goods.goodsId}
+        </if>
+        <if test="goods.barCode != null">
+            and BarCode = #{goods.barCode}
+        </if>
+        <if test="goods.name != null">
+            and Name like '%'+#{goods.name}+'%'
+        </if>
+
+    </select>
+
+
+
+
+</mapper>

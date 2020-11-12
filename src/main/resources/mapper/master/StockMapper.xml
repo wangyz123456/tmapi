@@ -7,11 +7,11 @@
 
     <select id="queryByCond" resultType="com.example.tmapi.entity.Stock" parameterType="com.example.tmapi.entity.Stock">
         SELECT
-            s.StoreID as StoreID,
-            st.StoreName as StoreName,
-            s.GoodsID as GoodsID,
-            g.Name as Name,
-            SUM (s.Quantity) AS Quantity
+            s.StoreID as storeId,
+            st.StoreName as storeName,
+            s.GoodsID as goodsId,
+            g.Name as name,
+            SUM (s.Quantity) AS quantity
         FROM
             Stock s
         LEFT JOIN Stores st on st.StoreID = s.StoreID

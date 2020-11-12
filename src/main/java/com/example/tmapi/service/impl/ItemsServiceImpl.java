@@ -39,7 +39,7 @@ public class ItemsServiceImpl implements ItemsService {
         for (Items itemsDto:itemList) {
             Boolean flag = false;
             for (PurchaseItemBak purchaseItemBakDto:bakList) {
-                if(itemsDto.getStoreID().equals(purchaseItemBakDto.getStoreId())&&itemsDto.getGoodsID()== purchaseItemBakDto.getGoodsID()){
+                if(itemsDto.getStoreId().equals(purchaseItemBakDto.getStoreId())&&itemsDto.getGoodsId()== purchaseItemBakDto.getGoodsId()){
                     if(purchaseItemBakDto.getQty().compareTo(new BigDecimal(0))==1){
                         resultYList.add(itemsDto);
                         flag =true;

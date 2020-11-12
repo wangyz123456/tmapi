@@ -26,7 +26,7 @@ public class StockServiceImpl implements StockService {
         List<Items>  itemsList = itemsDao.queryByCond(items);
         for (Items itemsDto:itemsList) {
             for (Stock stockDto:stockList) {
-                if(itemsDto.getGoodsID()==stockDto.getGoodsID()&&itemsDto.getStoreID().equals(stockDto.getStoreID())){
+                if(itemsDto.getGoodsId()==stockDto.getGoodsId()&&itemsDto.getStoreId().equals(stockDto.getStoreId())){
                     BigDecimal fz = stockDto.getQuantity();
                     BigDecimal fm = itemsDto.getRecQty();
                     stockDto.setJhqty(fm);

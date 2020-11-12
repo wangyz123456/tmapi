@@ -3,20 +3,20 @@
 <mapper namespace="com.example.tmapi.dao.master.PurchaseItemBakDao">
 
     <select id="querySumAmountTodayById" resultType="com.example.tmapi.entity.PurchaseItemBak" parameterType="com.example.tmapi.entity.PurchaseItemBak" >
-        SELECT SUM (Amount) TodaySumAmount
+        SELECT SUM (Amount) as todaySumAmount
         FROM
         purchaseItemBak p
         LEFT JOIN POSSeller s ON p.SellerID = s.SellerName
         WHERE
         1 = 1
-        <if test="purchaseItemBak.StoreId != null">
-            and p.StoreId = #{purchaseItemBak.StoreId}
+        <if test="purchaseItemBak.storeId != null">
+            and p.StoreId = #{purchaseItemBak.storeId}
         </if>
-        <if test="purchaseItemBak.StoreId != null">
-            and s.StoreId = #{purchaseItemBak.StoreId}
+        <if test="purchaseItemBak.storeId != null">
+            and s.StoreId = #{purchaseItemBak.storeId}
         </if>
-        <if test="purchaseItemBak.SellerID != null">
-            and s.SellerID = #{purchaseItemBak.SellerID}
+        <if test="purchaseItemBak.sellerId != null">
+            and s.SellerID = #{purchaseItemBak.sellerId}
         </if>
         <if test="purchaseItemBak.startDate != null">
             and p.BuyDate = #{purchaseItemBak.startDate}
@@ -28,9 +28,9 @@
 
     <select id="queryByStoreId" resultType="com.example.tmapi.entity.PurchaseItemBak" parameterType="com.example.tmapi.entity.PurchaseItemBak">
         SELECT
-            StoreId,
-            SUM(Amount) as TodaySumAmount,
-            sum(Qty * StockPrice) as SaleCost,
+            StoreId as storeId,
+            SUM(Amount) as todaySumAmount,
+            sum(Qty * StockPrice) as saleCost,
             sum(Amount-Qty * StockPrice) as sumProfit
 
         FROM
@@ -39,11 +39,11 @@
         <if test="purchaseItemBak.startDate != null">
             and  BuyDate = #{purchaseItemBak.startDate}
         </if>
-        <if test="purchaseItemBak.StoreId != null">
-            and StoreID = #{purchaseItemBak.StoreId}
+        <if test="purchaseItemBak.storeId != null">
+            and StoreID = #{purchaseItemBak.storeId}
         </if>
-        <if test="purchaseItemBak.SellerID != null">
-            and  SellerID = #{purchaseItemBak.SellerID}
+        <if test="purchaseItemBak.sellerId != null">
+            and  SellerID = #{purchaseItemBak.sellerId}
         </if>
         GROUP BY
             StoreID
@@ -53,9 +53,9 @@
 
     <select id="queryByDate"  resultType="com.example.tmapi.entity.PurchaseItemBak" parameterType="com.example.tmapi.entity.PurchaseItemBak">
         SELECT
-          StoreID,
-          GoodsID,
-            SUM (qty) qty
+          StoreID as storeId,
+          GoodsID as goodsId,
+          SUM (qty) as qty
 
         FROM
             PurchaseItemBak
@@ -66,16 +66,17 @@
 
     <select id="queryByDateTime"  resultType="com.example.tmapi.entity.PurchaseItemBak" parameterType="com.example.tmapi.entity.PurchaseItemBak">
        SELECT
-            i.StoreID,
-            s.StoreName as StoreName,
-            i.GoodsID,
-            LEFT(g.Name,8)as Name,
-            i.SellerID,
-            i.Qty,
-            i.Price,
-            i.Amount,
-            i.BuyDate,
-            p.BuyTime as BuyTime
+            i.StoreID as storeId,
+            s.StoreName as storeName,
+            i.GoodsID as goodsId,
+            LEFT(g.Name,8)as name,
+            i.SellerID as sellerId,
+            i.Qty as qty,
+            i.Price as price,
+            i.OldPrice as oldPrice,
+            i.Amount as amount,
+            i.BuyDate as buyDate,
+            p.BuyTime as buyTime
         FROM
             PurchaseItemBak i,
             PurchaseBak p,

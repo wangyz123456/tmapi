@@ -11,6 +11,6 @@ public class ContrastSaleData implements Serializable {
 
     private Date date;
     private BigDecimal lxamt;
-    private Date StartDate;
+    private Date startDate;
     private Date endDate;
 }
