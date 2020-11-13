@@ -61,9 +61,8 @@ public class TestSpringTask {
         count++;
     }
 
-
     @Async
-    @Scheduled(cron = "0 0 8,9,10,11,12,13,14,15,16,17,18,19,20,21 * * *")
+   @Scheduled(cron = "${timer.cron.str4}")
     public void zxspxsTask(){
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -81,7 +80,6 @@ public class TestSpringTask {
                 List<PurchaseItemBak> list = purchaseItemBakService.queryByDateTime(dto);
                 for (PurchaseItemBak purchaseItemBak:list) {
                     robot.sendMsg(purchaseItemBak.toString(), urlMap.get(purchaseItemBak.getStoreId())+"");
-
                 }
             }
         });
@@ -89,7 +87,7 @@ public class TestSpringTask {
 
 
     @Async
-    @Scheduled(cron = "0 0 21 * * *")
+    @Scheduled(cron = "${timer.cron.str3}")
     public void zxspTask(){
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -121,7 +119,7 @@ public class TestSpringTask {
 
 
     @Async
-    @Scheduled(cron = "0 30 21 * * *")
+    @Scheduled(cron = "${timer.cron.str2}")
     public void dsrwTask(){
         ChartData chartData = goalSetService.queryByDate("");
         map.clear();
@@ -130,6 +128,8 @@ public class TestSpringTask {
             @SneakyThrows
             @Override
             public void run() {
+                creatTaskXm(chartData);
+
                 new GaugeChart().createChart("零售销售完成度",creatPath("零售销售完成度"),chartData.getLsxswcdMap());
 
                 new GaugeChart().createChart("总销售额完成度",creatPath("总销售额完成度"),chartData.getZxsewcdMap());
@@ -206,7 +206,7 @@ public class TestSpringTask {
     }
 
     @Async
-    @Scheduled(cron = "${timer.cron}")
+    @Scheduled(cron = "${timer.cron.str1}")
     public void testTask() {
         ChartData chartData = goalSetService.queryByDate("");
 
@@ -214,6 +214,9 @@ public class TestSpringTask {
             @SneakyThrows
             @Override
             public void run() {
+
+                creatTaskXm(chartData);
+
                 new ChartsMixed().createMixedCharts(creatPath("门店零售同比"),chartData);
                 RobotSendServiceImpl robot= new RobotSendServiceImpl();
                 robot.sendMsg(map.get("门店零售同比").toString(),"门店零售同比","每天进步一点点！",serverUrl);
@@ -348,6 +351,78 @@ public class TestSpringTask {
 
 
         return resultMap;
+
+    }
+
+    /**
+     * 生成今日销售，毛利 日报表
+     * @param chartData  chartData
+     */
+    public void creatTaskXm(ChartData chartData) {
+        String[][] tableData2 = new String[chartData.getTmldblMap().size()+2][8];
+        String[] tt = {"门店名称","销售目标","毛利目标","销售额","毛利额","销售达标率","毛利达标率","是否完成"};
+        String[] categories = new String[chartData.getTmldblMap().size()];
+
+        int m = 0;
+        for (Map.Entry<String, Object> entry : chartData.getTmldblMap().entrySet()) {
+            categories[m]=entry.getKey();
+            m++;
+        }
+        DrawTableImgs cg = new DrawTableImgs();
+        try {
+            for (int i = 0; i < tt.length; i++) {
+                tableData2[0][i]=tt[i];
+            }
+
+            for (int i = 0; i < chartData.getTmldblMap().size(); i++) {
+                for (int j = 0; j < tt.length; j++) {
+                    switch(j){
+                        case 0:
+                            tableData2[i+1][j]=categories[i];break;
+                        case 1:
+                            tableData2[i+1][j]=chartData.getJrzxsTagMap().get(categories[i])==null?0+"":chartData.getJrzxsTagMap().get(categories[i])+"";
+                            break;
+                        case 2:
+                            tableData2[i+1][j]=chartData.getJrzmlTagMap().get(categories[i])==null?0+"":chartData.getJrzmlTagMap().get(categories[i])+"";
+                            break;
+                        case 3:
+                            tableData2[i+1][j]=chartData.getJrzxsSjMap().get(categories[i])==null?0+"":chartData.getJrzxsSjMap().get(categories[i])+"";
+                            break;
+                        case 4:
+                            tableData2[i+1][j]=chartData.getJrzmlSjMap().get(categories[i])==null?0+"":chartData.getJrzmlSjMap().get(categories[i])+"";
+                            break;
+                        case 5:
+                            tableData2[i+1][j]=chartData.getZxsdblMap().get(categories[i])==null?0+"%":chartData.getZxsdblMap().get(categories[i])+"%";
+                            break;
+                        case 6:
+                            tableData2[i+1][j]=chartData.getTmldblMap().get(categories[i])==null?0+"%":chartData.getTmldblMap().get(categories[i])+"%";
+                            break;
+                        case 7:
+                            BigDecimal big = (BigDecimal)chartData.getTmldblMap().get(categories[i]);
+                            tableData2[i+1][j]=big.compareTo(new BigDecimal(100)) == 1?"是":"否";
+                            break;
+                        default:
+                            System.out.println("default");break;
+                    }
+
+
+
+                }
+            }
+
+            tableData2[chartData.getTmldblMap().size()+1][0]="合计";
+            tableData2[chartData.getTmldblMap().size()+1][1]=MapSortUtil.getSum(chartData.getJrzxsTagMap()).setScale(2, BigDecimal.ROUND_HALF_UP)+"";
+            tableData2[chartData.getTmldblMap().size()+1][2]=MapSortUtil.getSum(chartData.getJrzmlTagMap()).setScale(2, BigDecimal.ROUND_HALF_UP)+"";
+            tableData2[chartData.getTmldblMap().size()+1][3]=MapSortUtil.getSum(chartData.getJrzxsSjMap()).setScale(2, BigDecimal.ROUND_HALF_UP)+"";
+            tableData2[chartData.getTmldblMap().size()+1][4]=MapSortUtil.getSum(chartData.getJrzmlSjMap()).setScale(2, BigDecimal.ROUND_HALF_UP)+"";
+            tableData2[chartData.getTmldblMap().size()+1][5]=chartData.getTmldblMap().size()>0?MapSortUtil.getSum(chartData.getZxsdblMap()).divide(new BigDecimal(chartData.getTmldblMap().size()), 2, BigDecimal.ROUND_HALF_UP)+"%":0+"%";
+            tableData2[chartData.getTmldblMap().size()+1][6]=chartData.getTmldblMap().size()>0?MapSortUtil.getSum(chartData.getTmldblMap()).divide(new BigDecimal(chartData.getTmldblMap().size()), 2, BigDecimal.ROUND_HALF_UP)+"%":0+"%";
+            tableData2[chartData.getTmldblMap().size()+1][7]="";
+
+            cg.myGraphicsGeneration(tableData2, creatPath("销售日报表"),"销售日报表");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 

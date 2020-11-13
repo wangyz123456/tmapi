@@ -33,6 +33,7 @@ public class PurchaseItemBak implements Serializable {
     private BigDecimal sumProfit;
     private Date startDate;
     private String startTime;
+    private String endTime;
     private Date lastInDate;
 
 

@@ -8,6 +8,17 @@ import java.util.Map;
 
 @Data
 public class ChartData implements Serializable {
+
+    //今日总销售目标
+    private  Map<String ,Object> jrzxsTagMap;
+    //今日总销售实际
+    private  Map<String ,Object> jrzxsSjMap;
+    //今日总毛利目标
+    private  Map<String ,Object> jrzmlTagMap;
+    //今日总毛利实际
+    private  Map<String ,Object> jrzmlSjMap;
+
+
     //总销售达标率
     private  Map<String ,Object> zxsdblMap;
     //总毛利达标率

@@ -26,7 +26,7 @@ public class DrawTableImgs {
             totalcol = cellsValue[0].length;
         }
         // 图片宽度
-        int imageWidth = 1024;
+        int imageWidth = 1224;
         // 行高
         int rowheight = 30;
         // 图片高度

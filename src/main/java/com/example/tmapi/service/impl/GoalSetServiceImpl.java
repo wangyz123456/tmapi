@@ -145,6 +145,15 @@ public class GoalSetServiceImpl implements GoalSetService {
         purchaseBak.setStoreId("004");
         PurchaseBak purchaseBak004 =  purchaseBakDao.querySumAmountByStoreId(purchaseBak);
 
+        //今日总销售目标
+        Map<String ,Object> jrzxsTagMap = new HashMap<>();
+        //今日总销售实际
+        Map<String ,Object> jrzxsSjMap = new HashMap<>();
+        //今日总毛利目标
+        Map<String ,Object> jrzmlTagMap = new HashMap<>();
+        //今日总毛利实际
+        Map<String ,Object> jrzmlSjMap = new HashMap<>();
+
         //总销售达标率(当天)
          Map<String ,Object> zxsdblMap = new HashMap<>();
         //总毛利达标率(累计)
@@ -361,10 +370,21 @@ public class GoalSetServiceImpl implements GoalSetService {
             zxsdblMap.put(goalSet.getPrimarySector(),zxstfz.multiply(new BigDecimal(100)).divide(zxstfm, 2, BigDecimal.ROUND_HALF_UP));
             zmldblMap.put(goalSet.getPrimarySector(),fz.multiply(new BigDecimal(100)).divide(fm, 2, BigDecimal.ROUND_HALF_UP));
             tmldblMap.put(goalSet.getPrimarySector(),tsummlfz.multiply(new BigDecimal(100)).divide(tsummlfm, 2, BigDecimal.ROUND_HALF_UP));
-
+            //今日总销售目标
+            jrzxsTagMap.put(goalSet.getPrimarySector(),zxstfm.setScale(2, BigDecimal.ROUND_HALF_UP));
+            //今日总销售实际
+            jrzxsSjMap.put(goalSet.getPrimarySector(),zxstfz.setScale(2, BigDecimal.ROUND_HALF_UP));
+            //今日总毛利目标
+            jrzmlTagMap.put(goalSet.getPrimarySector(),tsummlfm.setScale(2, BigDecimal.ROUND_HALF_UP));
+            //今日总毛利实际
+            jrzmlSjMap.put(goalSet.getPrimarySector(),tsummlfz.setScale(2, BigDecimal.ROUND_HALF_UP));
 
         }
 
+        chartData.setJrzxsTagMap(jrzxsTagMap);
+        chartData.setJrzxsSjMap(jrzxsSjMap);
+        chartData.setJrzmlTagMap(jrzmlTagMap);
+        chartData.setJrzmlSjMap(jrzmlSjMap);
 
         //今日总销售达标率
         chartData.setZxsdblMap(MapSortUtil.sortByValueDesc(zxsdblMap));
