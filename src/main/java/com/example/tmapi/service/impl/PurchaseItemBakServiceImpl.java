@@ -25,10 +25,10 @@ public class PurchaseItemBakServiceImpl implements PurchaseItemBakService {
 //        PurchaseItemBak dto= new PurchaseItemBak();
 
         purchaseItemBak.setStartDate(DataUtil.initToDayDateByMonth());
-        int time  = DataUtil.getHour()-1;
-        int time0  = DataUtil.getHour()-2;
-        purchaseItemBak.setStartTime(time0<10?"0"+time0+":00":time0+":00");
-        purchaseItemBak.setEndTime(time<10?"0"+time+":00":time+":00");
+//        int time  = DataUtil.getHour()-1;
+//        int time0  = DataUtil.getHour()-2;
+        purchaseItemBak.setStartTime("07:00");
+//        purchaseItemBak.setEndTime(time<10?"0"+time+":00":time+":00");
         List<PurchaseItemBak>list = purchaseItemBakDao.queryByDateTime(purchaseItemBak);
         StockOverDue sdto = new StockOverDue();
         List<StockOverDue> sList = stockOverDueDao.queryByCond(sdto);

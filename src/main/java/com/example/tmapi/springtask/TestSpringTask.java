@@ -61,6 +61,9 @@ public class TestSpringTask {
         count++;
     }
 
+    /**
+     * 库存商品销售
+     */
     @Async
    @Scheduled(cron = "${timer.cron.str4}")
     public void zxspxsTask(){
@@ -78,9 +81,24 @@ public class TestSpringTask {
                 }
                 PurchaseItemBak dto = new PurchaseItemBak();
                 List<PurchaseItemBak> list = purchaseItemBakService.queryByDateTime(dto);
-                for (PurchaseItemBak purchaseItemBak:list) {
-                    robot.sendMsg(purchaseItemBak.toString(), urlMap.get(purchaseItemBak.getStoreId())+"");
+//                for (PurchaseItemBak purchaseItemBak:list) {
+//                    robot.sendMsg(purchaseItemBak.toString(), urlMap.get(purchaseItemBak.getStoreId())+"");
+//                }
+
+                for (Map.Entry<String, Object> entry : urlMap.entrySet()) {
+                    List<PurchaseItemBak> newList = new ArrayList<>();
+                    String storeName = "";
+                    for (PurchaseItemBak purchaseItemBak:list) {
+                        if(entry.getKey().equals(purchaseItemBak.getStoreId())){
+                            storeName=purchaseItemBak.getStoreName();
+                            newList.add(purchaseItemBak);
+                        }
+                    }
+                    if(newList.size()>0)
+                    creatTaskXKC(newList,entry.getValue()+"",storeName);
+
                 }
+
             }
         });
     }
@@ -261,7 +279,68 @@ public class TestSpringTask {
         }
 
     }
+    /**
+     * 生成今日销售 库存商品 日报表
+     * @param list<PurchaseItemBak>  list
+     * @param str str
+     */
+    public void creatTaskXKC(List<PurchaseItemBak> list,String str,String storeName) {
+        String[][] tableData2 = new String[list.size() + 1][8];
+        String[] tt = {"售货员", "销售时间", "数量", "商品名称", "原价","售价", "总金额", "最后进货日期"};
 
+        DrawTableImgs cg = new DrawTableImgs();
+        try {
+            for (int i = 0; i < tt.length; i++) {
+                tableData2[0][i] = tt[i];
+            }
+
+            for (int i = 0; i < list.size(); i++) {
+                for (int j = 0; j < tt.length; j++) {
+                    switch (j) {
+                        case 0:
+                            tableData2[i + 1][j] = list.get(i).getSellerId();
+                            break;
+                        case 1:
+                            tableData2[i + 1][j] = list.get(i).getBuyTime();
+                            break;
+                        case 2:
+                            tableData2[i + 1][j] = list.get(i).getQty().setScale(2, BigDecimal.ROUND_HALF_UP)+ "";
+                            break;
+                        case 3:
+                            tableData2[i + 1][j] = list.get(i).getName();
+                            break;
+                        case 4:
+                            tableData2[i + 1][j] = list.get(i).getOldPrice().setScale(2, BigDecimal.ROUND_HALF_UP)+ "";
+                            break;
+                        case 5:
+                            tableData2[i + 1][j] = list.get(i).getPrice().setScale(2, BigDecimal.ROUND_HALF_UP)+""  ;
+                            break;
+                        case 6:
+                            tableData2[i + 1][j] = list.get(i).getAmount().setScale(2, BigDecimal.ROUND_HALF_UP)+"" ;
+                            break;
+                        case 7:
+                            tableData2[i + 1][j] = DataUtil.format(list.get(i).getLastInDate(),"yyyy-MM-dd");
+                            break;
+                        default:
+                            System.out.println("default");
+                            break;
+                    }
+
+
+                }
+            }
+
+            cg.myGraphicsGeneration(tableData2, creatPath(storeName+"：库存商品销售日报表"),storeName+"：库存商品销售日报表");
+            RobotSendServiceImpl robot= new RobotSendServiceImpl();
+            robot.sendMsg(map.get(storeName+"：库存商品销售日报表").toString(),storeName+"：库存商品销售日报表","加油！",str);
+//            robot.sendMsg(map.get(storeName+"：库存商品销售日报表").toString(),storeName+"：库存商品销售日报表","加油！",serverUrl);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
 
     /**
      * 生成滞销表单
@@ -273,7 +352,7 @@ public class TestSpringTask {
      */
     public Map<String,Object> creatTaskZX(List<Items> list,String storeId,List<Items> ylist,Map<String,Object> resultMap) {
         List<Items> newList = new ArrayList<>();
-        String stroeName = "";
+        String storeName = "";
         BigDecimal fz = new BigDecimal(0);
         BigDecimal fm = new BigDecimal(0);
 
@@ -281,7 +360,7 @@ public class TestSpringTask {
             if(storeId.equals(items.getStoreId())){
                 newList.add(items);
                 fz = fz.add(items.getCBAmount());
-                stroeName = items.getStoreName();
+                storeName = items.getStoreName();
             }
 
         }
@@ -295,9 +374,9 @@ public class TestSpringTask {
             Map<String,Object> mdrMap = (Map<String, Object>) resultMap.get("mdrMap");
             Map<String,Object> wxMap = (Map<String, Object>) resultMap.get("wxMap");
             Map<String,Object> zMap = (Map<String, Object>) resultMap.get("zMap");
-            wxMap.put(stroeName,fz.setScale(2, BigDecimal.ROUND_HALF_UP));
-            zMap.put(stroeName,fm.add(fz).setScale(2, BigDecimal.ROUND_HALF_UP));
-            mdrMap.put(stroeName,fz.multiply(new BigDecimal(100)).divide(fm.add(fz), 2, BigDecimal.ROUND_HALF_UP));
+            wxMap.put(storeName,fz.setScale(2, BigDecimal.ROUND_HALF_UP));
+            zMap.put(storeName,fm.add(fz).setScale(2, BigDecimal.ROUND_HALF_UP));
+            mdrMap.put(storeName,fz.multiply(new BigDecimal(100)).divide(fm.add(fz), 2, BigDecimal.ROUND_HALF_UP));
             String[][] tableData2 = new String[newList.size() + 1][7];
             String[] tt = {"分店名称", "大类编码", "条码", "名称", "售价", "进货数量", "进货金额"};
 
@@ -340,9 +419,9 @@ public class TestSpringTask {
                     }
                 }
 
-                cg.myGraphicsGeneration(tableData2, creatPath(stroeName+"：15天未销售商品报表"),stroeName+"：15天未销售商品报表，进货日期："+DataUtil.format(DataUtil.addDay(DataUtil.getFormat(),-15)));
+                cg.myGraphicsGeneration(tableData2, creatPath(storeName+"：15天未销售商品报表"),storeName+"：15天未销售商品报表，进货日期："+DataUtil.format(DataUtil.addDay(DataUtil.getFormat(),-15)));
                 RobotSendServiceImpl robot= new RobotSendServiceImpl();
-                robot.sendMsg(map.get(stroeName+"：15天未销售商品报表").toString(),stroeName+"：15天未销售商品报表","请及时处理！",serverUrl);
+                robot.sendMsg(map.get(storeName+"：15天未销售商品报表").toString(),storeName+"：15天未销售商品报表","请及时处理！",serverUrl);
 
             } catch (Exception e) {
                 e.printStackTrace();

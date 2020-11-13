@@ -91,7 +91,6 @@
         and i.GoodsID = g.GoodsID
         and p.BuyDate= #{purchaseItemBak.startDate}
         and p.BuyTime >= #{purchaseItemBak.startTime}
-        and p.BuyTime &lt;= #{purchaseItemBak.endTime}
-        ORDER BY i.StoreID
+        ORDER BY i.StoreID,buyTime
     </select>
 </mapper>
