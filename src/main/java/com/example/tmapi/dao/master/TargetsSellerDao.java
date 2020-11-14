@@ -5,6 +5,7 @@ import com.example.tmapi.entity.TargetsSeller;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 
 
 @Repository
@@ -15,4 +16,6 @@ public interface TargetsSellerDao {
      * @return targetsSeller
      */
     TargetsSeller queryTargetsSellerByCond(@Param(value="targetsSeller") TargetsSeller targetsSeller);
+
+    List<TargetsSeller> queryByStoreId(@Param(value="targetsSeller") TargetsSeller targetsSeller);
 }

@@ -20,4 +20,31 @@
 
     </select>
 
+
+    <select id="queryByStoreId" resultType="com.example.tmapi.entity.TargetsSeller" parameterType="com.example.tmapi.entity.TargetsSeller">
+        SELECT
+        t.SellerId,
+        p.SellerName,
+        t.StoreID,
+        s.StoreName,
+        t.Goals
+        FROM
+        TargetsSeller t,
+        Stores s,
+        POSSeller p
+        WHERE
+        t.StoreID = s.StoreID
+        and t.SellerID = p.SellerID
+        <if test="targetsSeller.storeId != null">
+            and StoreID = #{targetsSeller.storeId}
+        </if>
+        <if test="targetsSeller.sellerId != null">
+            and SellerID = #{targetsSeller.sellerId}
+        </if>
+        <if test="targetsSeller.date != null">
+            and Date = #{targetsSeller.date}
+        </if>
+
+    </select>
+
 </mapper>
