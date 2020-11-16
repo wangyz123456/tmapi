@@ -10,7 +10,7 @@
         <result column="GoodsID" property="goodsId" jdbcType="INTEGER" />
         <result column="Qty" property="qty" jdbcType="DECIMAL" />
         <result column="Price" property="price" jdbcType="DECIMAL" />
-        <result column="Amount" property="totalAmount" jdbcType="DECIMAL" />
+<!--        <result column="Amount" property="totalAmount" jdbcType="DECIMAL" />-->
     </resultMap>
 
     <select id="queryByCond" resultType="com.example.tmapi.entity.PurchaseItem" parameterType="com.example.tmapi.entity.PurchaseItem" >

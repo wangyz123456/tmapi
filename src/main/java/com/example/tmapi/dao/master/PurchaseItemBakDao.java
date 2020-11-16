@@ -16,6 +16,13 @@ public interface PurchaseItemBakDao {
     PurchaseItemBak querySumAmountTodayById(@Param("purchaseItemBak") PurchaseItemBak purchaseItemBak);
 
     /**
+     * 根据id查询销售总金额（当天）
+     * @param purchaseItemBak PurchaseItemBak
+     * @return PurchaseItemBak
+     */
+    List<PurchaseItemBak> querySumAmountTodayByCond(@Param("purchaseItemBak") PurchaseItemBak purchaseItemBak);
+
+    /**
      * 根据门店ID查询各门店当天零售总额
      * @param purchaseItemBak  PurchaseItemBak
      * @return list

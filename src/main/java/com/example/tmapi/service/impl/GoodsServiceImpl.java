@@ -15,7 +15,7 @@ public class GoodsServiceImpl implements GoodsService {
     @Autowired
     private GoodsDao goodsDao;
     @Override
-    public PageInfo<Goods> queryBuCond(Goods goods) {
+    public PageInfo<Goods> queryByCond(Goods goods) {
         PageHelper.startPage(goods.getPageNum(), goods.getPageSize()<=0?10:goods.getPageSize());
         List<Goods> list = goodsDao.queryByCond(goods);
         PageInfo<Goods> page = new PageInfo<Goods>(list);

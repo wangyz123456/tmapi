@@ -16,7 +16,7 @@ public class GoodsController {
 
     @RequestMapping(value = "queryPage",method = RequestMethod.POST)
     public PageInfo<Goods> queryByCond(@RequestBody Goods goods){
-        PageInfo<Goods>  page = goodsService.queryBuCond(goods);
+        PageInfo<Goods>  page = goodsService.queryByCond(goods);
         return page;
     }
 

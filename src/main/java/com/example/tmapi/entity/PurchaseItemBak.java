@@ -38,6 +38,7 @@ public class PurchaseItemBak implements Serializable {
 
 
 
+
     @Override
     public String toString() {
         return  storeName +"：" + sellerId +","+DataUtil.format(buyDate,"yyyy-MM-dd")+"日,"  + buyTime + "点,卖出："+ qty +"个"  + name + ", 原价：" + oldPrice + ", 售价：" + price +

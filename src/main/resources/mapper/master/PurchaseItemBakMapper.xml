@@ -24,7 +24,28 @@
 
 
     </select>
+    <select id="querySumAmountTodayByCond" resultType="com.example.tmapi.entity.PurchaseItemBak" parameterType="com.example.tmapi.entity.PurchaseItemBak" >
+        SELECT
+        p.StoreId,
+        s.SellerID,
+        SUM (Amount) AS todaySumAmount
+        FROM
+        purchaseItemBak p LEFT JOIN POSSeller s ON p.SellerID = s.SellerName AND p.StoreId = s.StoreId
+        WHERE
+        1 = 1
+        <if test="purchaseItemBak.storeId != null">
+            and s.StoreId = #{purchaseItemBak.storeId}
+        </if>
+        <if test="purchaseItemBak.sellerId != null">
+            and s.SellerID = #{purchaseItemBak.sellerId}
+        </if>
+        <if test="purchaseItemBak.startDate != null">
+            and p.BuyDate >= #{purchaseItemBak.startDate}
+        </if>
+        GROUP BY p.StoreId,s.SellerID
+        ORDER BY p.StoreId
 
+    </select>
 
     <select id="queryByStoreId" resultType="com.example.tmapi.entity.PurchaseItemBak" parameterType="com.example.tmapi.entity.PurchaseItemBak">
         SELECT

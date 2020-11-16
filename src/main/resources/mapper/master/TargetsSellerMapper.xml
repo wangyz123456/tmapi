@@ -24,7 +24,7 @@
     <select id="queryByStoreId" resultType="com.example.tmapi.entity.TargetsSeller" parameterType="com.example.tmapi.entity.TargetsSeller">
         SELECT
         t.SellerId,
-        p.SellerName,
+        p.SellerName as sellerName,
         t.StoreID,
         s.StoreName,
         t.Goals
@@ -36,13 +36,13 @@
         t.StoreID = s.StoreID
         and t.SellerID = p.SellerID
         <if test="targetsSeller.storeId != null">
-            and StoreID = #{targetsSeller.storeId}
+            and t.StoreID = #{targetsSeller.storeId}
         </if>
         <if test="targetsSeller.sellerId != null">
-            and SellerID = #{targetsSeller.sellerId}
+            and t.SellerID = #{targetsSeller.sellerId}
         </if>
         <if test="targetsSeller.date != null">
-            and Date = #{targetsSeller.date}
+            and t.Date = #{targetsSeller.date}
         </if>
 
     </select>
