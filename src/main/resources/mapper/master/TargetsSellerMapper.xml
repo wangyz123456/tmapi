@@ -38,13 +38,15 @@
         <if test="targetsSeller.storeId != null">
             and t.StoreID = #{targetsSeller.storeId}
         </if>
-        <if test="targetsSeller.sellerId != null">
+        <if test="targetsSeller.sellerId != null and targetsSeller.sellerId !='' ">
             and t.SellerID = #{targetsSeller.sellerId}
         </if>
         <if test="targetsSeller.date != null">
             and t.Date = #{targetsSeller.date}
         </if>
 
+        GROUP BY  t.SellerId,p.SellerName,t.StoreID,s.StoreName,
+        t.Goals
     </select>
 
 </mapper>

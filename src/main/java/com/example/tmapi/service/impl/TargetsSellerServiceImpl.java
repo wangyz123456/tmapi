@@ -84,10 +84,12 @@ public class TargetsSellerServiceImpl implements TargetsSellerService {
     public List<TargetsSeller> queryByCond(TargetsSeller targetsSeller) {
         List<TargetsSeller> resultList  = new ArrayList<>();
          //查询当月目标值
+        String[] sellerIds =targetsSeller.getSellerId().split(";");
+        targetsSeller.setSellerId("");
         targetsSeller.setDate(DataUtil.format(DataUtil.initToDayDateByMonth(),"yyyyMM"));
         List<TargetsSeller> targetsSellerList = targetsSellerDao.queryByStoreId(targetsSeller);
 
-        String[] sellerIds =targetsSeller.getSellerId().split(";");
+
         //查询当天销售额
         PurchaseItemBak  purchaseBak = new PurchaseItemBak();
         purchaseBak.setStoreId(targetsSeller.getStoreId());
@@ -125,9 +127,12 @@ public class TargetsSellerServiceImpl implements TargetsSellerService {
             boolean flag = true;
             for (PurchaseItemBak dto:purchaseBakDtoList) {
                 if(targetsSellerDto.getStoreId().equals(dto.getStoreId())&&targetsSellerDto.getSellerId().equals(dto.getSellerId())){
-                    BigDecimal result = dto.getTodaySumAmount().multiply(new BigDecimal(100)).divide(targetsSellerDto.getGoalsToday(), 2, BigDecimal.ROUND_HALF_UP);
+                    if(targetsSellerDto.getGoals().compareTo(new BigDecimal(0))==1) {
+                        BigDecimal result = dto.getTodaySumAmount().multiply(new BigDecimal(100)).divide(targetsSellerDto.getGoalsToday(), 2, BigDecimal.ROUND_HALF_UP);
+                        targetsSellerDto.setYwcd(result+"%");
+                    }else
+                        targetsSellerDto.setYwcd(0+"%");
                     targetsSellerDto.setSjToday(dto.getTodaySumAmount()==null?new BigDecimal(0):dto.getTodaySumAmount());
-                    targetsSellerDto.setWcd(result+"%");
                     flag = false;
                     break;
                 }
@@ -153,6 +158,8 @@ public class TargetsSellerServiceImpl implements TargetsSellerService {
     @Override
     public List<TargetsSeller> queryByCondMonth(TargetsSeller targetsSeller) {
         List<TargetsSeller> resultList  = new ArrayList<>();
+        String[] sellerIds =targetsSeller.getSellerId().split(";");
+        targetsSeller.setSellerId("");
         //查询当月目标值
         targetsSeller.setDate(DataUtil.format(DataUtil.initToDayDateByMonth(),"yyyyMM"));
         List<TargetsSeller> targetsSellerList = targetsSellerDao.queryByStoreId(targetsSeller);
@@ -167,14 +174,18 @@ public class TargetsSellerServiceImpl implements TargetsSellerService {
 
         List<PurchaseItemBak>  purchaseBakDtoList = purchaseItemBakDao.querySumAmountTodayByCond(purchaseBak);
 
-        String[] sellerIds =targetsSeller.getSellerId().split(";");
+
         for (TargetsSeller targetsSellerDto:targetsSellerList) {
             boolean flag = true;
             for (PurchaseItemBak dto:purchaseBakDtoList) {
                 if(targetsSellerDto.getStoreId().equals(dto.getStoreId())&&targetsSellerDto.getSellerId().equals(dto.getSellerId())){
-                    BigDecimal result = dto.getTodaySumAmount().multiply(new BigDecimal(100)).divide(targetsSellerDto.getGoals(), 2, BigDecimal.ROUND_HALF_UP);
+                    if(targetsSellerDto.getGoals().compareTo(new BigDecimal(0))==1) {
+                        BigDecimal result = dto.getTodaySumAmount().multiply(new BigDecimal(100)).divide(targetsSellerDto.getGoals(), 2, BigDecimal.ROUND_HALF_UP);
+                        targetsSellerDto.setYwcd(result+"%");
+                    }else
+                        targetsSellerDto.setYwcd(0+"%");
                     targetsSellerDto.setYsjToday(dto.getTodaySumAmount()==null?new BigDecimal(0):dto.getTodaySumAmount());
-                    targetsSellerDto.setYwcd(result+"%");
+
                     flag = false;
                     break;
                 }

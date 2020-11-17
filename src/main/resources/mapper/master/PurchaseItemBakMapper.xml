@@ -36,7 +36,7 @@
         <if test="purchaseItemBak.storeId != null">
             and s.StoreId = #{purchaseItemBak.storeId}
         </if>
-        <if test="purchaseItemBak.sellerId != null">
+        <if test="purchaseItemBak.sellerId != null and purchaseItemBak.sellerId != '' ">
             and s.SellerID = #{purchaseItemBak.sellerId}
         </if>
         <if test="purchaseItemBak.startDate != null">

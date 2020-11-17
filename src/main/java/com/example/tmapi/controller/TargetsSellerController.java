@@ -37,12 +37,18 @@ public class TargetsSellerController {
     }
 
     @RequestMapping(value = "queryTargetsSellerDay",method = RequestMethod.POST)
-    public JsonData queryByCondDay(@RequestBody TargetsSeller targetsSeller){
+    public JsonData queryByCondDay(String storeId,String sellerId){
+        TargetsSeller targetsSeller = new TargetsSeller();
+        targetsSeller.setStoreId(storeId);
+        targetsSeller.setSellerId(sellerId);
         List<TargetsSeller> list = targetsSellerService.queryByCond(targetsSeller);
         return JsonData.buildSuccess(list);
     }
     @RequestMapping(value = "queryTargetsSellerMonth",method = RequestMethod.POST)
-    public JsonData queryByCondMonth(@RequestBody TargetsSeller targetsSeller){
+    public JsonData queryByCondMonth(String storeId,String sellerId){
+        TargetsSeller targetsSeller = new TargetsSeller();
+        targetsSeller.setStoreId(storeId);
+        targetsSeller.setSellerId(sellerId);
         List<TargetsSeller> list = targetsSellerService.queryByCondMonth(targetsSeller);
         return JsonData.buildSuccess(list);
     }
