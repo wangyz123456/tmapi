@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.tmapi.dao.slave.GoalSetDao">
+
+    <select id="queryByCond" resultType="com.example.tmapi.entity.GoalSet">
+        select * from goal_set
+    </select>
+
+    <select id="queryByDate" resultType="com.example.tmapi.entity.GoalSet" parameterType="String">
+        SELECT
+        gs.store_id as storeId,
+        s.primary_sector as primarySector,
+        s.amt_lx as amtLx,
+        s.amt_lm as amtLm,
+        s.amt_px as amtPx,
+        s.amt_pm as amtPm,
+        s.date as date
+        FROM
+        goal_set s
+        LEFT JOIN goal_storeid gs ON s.primary_sector = gs.primary_sector
+        WHERE
+        1 = 1
+        AND s.amt_lx is not NULL
+        AND s.amt_lm  is not NULL
+        AND s. DATE = #{date}
+    </select>
+
+
+</mapper>

@@ -1,0 +1,209 @@
+package com.example.tmapi.service.impl;
+
+import com.example.tmapi.dao.master.*;
+import com.example.tmapi.dao.slave.GoalDayRateDao;
+import com.example.tmapi.entity.*;
+import com.example.tmapi.service.TargetsSellerService;
+import com.example.tmapi.utils.DataUtil;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+@Service
+public class TargetsSellerServiceImpl implements TargetsSellerService {
+    @Autowired
+    private TargetsSellerDao targetsSellerDao;
+
+    @Autowired
+    private PurchaseItemDao purchaseItemDao;
+
+    @Autowired
+    private PurchaseItemBakDao purchaseItemBakDao;
+
+    @Autowired
+    private GoalDayRateDao goalDayRateDao;
+
+    /**
+     * 查询店员销售业绩，以及销售金额
+     * @param storeId  storeId
+     * @param sellerId sellerId
+     * @return map
+     */
+    @Override
+    public Map<String,Object> queryTargetsSellerByCond(String storeId,String sellerId) {
+        Map<String,Object> map = new HashMap<>();
+        Purchase purchase = new Purchase();
+        PurchaseItemBak purchaseBak = new PurchaseItemBak();
+        TargetsSeller targetsSeller = new TargetsSeller();
+        targetsSeller.setStoreId(storeId);
+        targetsSeller.setSellerId(sellerId);
+        Date dNow = new Date( );
+        SimpleDateFormat ft = new SimpleDateFormat ("yyyyMM");
+        //查询当月销售目标
+        String Date = ft.format(dNow);
+        targetsSeller.setDate(Date);
+        TargetsSeller targetsSellerDto = targetsSellerDao.queryTargetsSellerByCond(targetsSeller);
+
+        //查询当月第一天到当天前一天销售业绩
+        purchase.setStoreId(storeId);
+        purchase.setSellerId(sellerId);
+        purchase.setStartDate(DataUtil.initDateByMonth());
+        Purchase purchaseDto = purchaseItemDao.querySumAmountById(purchase);
+        //查询当天销售额
+        purchaseBak.setStoreId(storeId);
+        purchaseBak.setSellerId(sellerId);
+        purchaseBak.setStartDate(DataUtil.initToDayDateByMonth());
+        PurchaseItemBak  purchaseBakDto = purchaseItemBakDao.querySumAmountTodayById(purchaseBak);
+        //封装返回参数
+        if(targetsSellerDto!=null){
+            map.put("Goals",targetsSellerDto.getGoals());
+        }else{
+            map.put("Goals",0);
+        }
+        if(purchaseDto!=null){
+            map.put("SumAmount",purchaseDto.getSumAmount());
+        }else{
+            map.put("SumAmount",0);
+        }
+        if(purchaseBakDto!=null){
+            map.put("TodaySumAmount",purchaseBakDto.getTodaySumAmount());
+        }else{
+            map.put("TodaySumAmount",0);
+        }
+
+        return map;
+    }
+
+    @Override
+    public List<TargetsSeller> queryByCond(TargetsSeller targetsSeller) {
+        List<TargetsSeller> resultList  = new ArrayList<>();
+         //查询当月目标值
+        String[] sellerIds =targetsSeller.getSellerId().split(";");
+        targetsSeller.setSellerId("");
+        targetsSeller.setDate(DataUtil.format(DataUtil.initToDayDateByMonth(),"yyyyMM"));
+        List<TargetsSeller> targetsSellerList = targetsSellerDao.queryByStoreId(targetsSeller);
+
+
+        //查询当天销售额
+        PurchaseItemBak  purchaseBak = new PurchaseItemBak();
+        purchaseBak.setStoreId(targetsSeller.getStoreId());
+//        purchaseBak.setSellerId(targetsSeller.getSellerId());
+        purchaseBak.setStartDate(DataUtil.initToDayDateByMonth());
+        List<PurchaseItemBak>  purchaseBakDtoList = purchaseItemBakDao.querySumAmountTodayByCond(purchaseBak);
+
+
+        //获取当天日期 "yyyy-MM-dd"
+        String s = DataUtil.format(DataUtil.initToDayDateByMonth(),DataUtil.FORMAT_LONOGRAM);
+        //查询当天利率
+        List<GoalDayRate> goalDayRateList = goalDayRateDao.queryByDate(s);
+
+        //放入当天目标值
+        for (TargetsSeller targetsSellerDto:targetsSellerList) {
+            if(targetsSellerDto.getStoreId().equals("065")||targetsSellerDto.getStoreId().equals("004")){
+                for (GoalDayRate goalDayRate:goalDayRateList) {
+                    if(goalDayRate.getStore().equals("天天便利店")){
+                        BigDecimal big = targetsSellerDto.getGoals().multiply(new BigDecimal(goalDayRate.getLRate()));
+                        targetsSellerDto.setGoalsToday(big.setScale(2,BigDecimal.ROUND_HALF_UP));
+                    }
+                }
+            }else{
+                for (GoalDayRate goalDayRate:goalDayRateList) {
+                    if(!(goalDayRate.getStore().equals("天天便利店"))){
+                        BigDecimal big = targetsSellerDto.getGoals().multiply(new BigDecimal(goalDayRate.getLRate()));
+                        targetsSellerDto.setGoalsToday(big.setScale(2,BigDecimal.ROUND_HALF_UP));
+                    }
+                }
+            }
+
+        }
+
+        for (TargetsSeller targetsSellerDto:targetsSellerList) {
+            boolean flag = true;
+            for (PurchaseItemBak dto:purchaseBakDtoList) {
+                if(targetsSellerDto.getStoreId().equals(dto.getStoreId())&&targetsSellerDto.getSellerId().equals(dto.getSellerId())){
+                    if(targetsSellerDto.getGoals().compareTo(new BigDecimal(0))==1) {
+                        BigDecimal result = dto.getTodaySumAmount().multiply(new BigDecimal(100)).divide(targetsSellerDto.getGoalsToday(), 1, BigDecimal.ROUND_HALF_UP);
+                        targetsSellerDto.setYwcd(result+"");
+                    }else
+                        targetsSellerDto.setYwcd(0+"");
+                    targetsSellerDto.setSjToday(dto.getTodaySumAmount()==null?new BigDecimal(0):dto.getTodaySumAmount());
+                    flag = false;
+                    break;
+                }
+            }
+            if(flag){
+                targetsSellerDto.setSjToday(new BigDecimal(0));
+                targetsSellerDto.setWcd(0+"");
+            }
+
+
+            for (int i = 0; i < sellerIds.length; i++) {
+                if(targetsSellerDto.getSellerId().equals(sellerIds[i])){
+                    resultList.add(targetsSellerDto);
+                }
+            }
+        }
+
+
+        return resultList;
+
+    }
+
+    @Override
+    public List<TargetsSeller> queryByCondMonth(TargetsSeller targetsSeller) {
+        List<TargetsSeller> resultList  = new ArrayList<>();
+        String[] sellerIds =targetsSeller.getSellerId().split(";");
+        targetsSeller.setSellerId("");
+        //查询当月目标值
+        targetsSeller.setDate(DataUtil.format(DataUtil.initToDayDateByMonth(),"yyyyMM"));
+        List<TargetsSeller> targetsSellerList = targetsSellerDao.queryByStoreId(targetsSeller);
+
+        //查询当天销售额
+        PurchaseItemBak  purchaseBak = new PurchaseItemBak();
+        purchaseBak.setStoreId(targetsSeller.getStoreId());
+//        purchaseBak.setSellerId(targetsSeller.getSellerId());
+        Date date = DataUtil.initDateByMonth();
+        String str  = DataUtil.format(date);
+        purchaseBak.setStartDate(DataUtil.parse(str));
+
+        List<PurchaseItemBak>  purchaseBakDtoList = purchaseItemBakDao.querySumAmountTodayByCond(purchaseBak);
+
+
+        for (TargetsSeller targetsSellerDto:targetsSellerList) {
+            boolean flag = true;
+            for (PurchaseItemBak dto:purchaseBakDtoList) {
+                if(targetsSellerDto.getStoreId().equals(dto.getStoreId())&&targetsSellerDto.getSellerId().equals(dto.getSellerId())){
+                    if(targetsSellerDto.getGoals().compareTo(new BigDecimal(0))==1) {
+                        BigDecimal result = dto.getTodaySumAmount().multiply(new BigDecimal(100)).divide(targetsSellerDto.getGoals(), 1, BigDecimal.ROUND_HALF_UP);
+                        targetsSellerDto.setYwcd(result+"");
+                    }else
+                        targetsSellerDto.setYwcd(0+"");
+                    targetsSellerDto.setYsjToday(dto.getTodaySumAmount()==null?new BigDecimal(0):dto.getTodaySumAmount());
+
+                    flag = false;
+                    break;
+                }
+            }
+            if(flag){
+                targetsSellerDto.setYsjToday(new BigDecimal(0));
+                targetsSellerDto.setYwcd(0+"");
+            }
+
+            for (int i = 0; i < sellerIds.length; i++) {
+                if(targetsSellerDto.getSellerId().equals(sellerIds[i])){
+                    resultList.add(targetsSellerDto);
+                }
+            }
+        }
+
+        return resultList;
+
+    }
+
+}

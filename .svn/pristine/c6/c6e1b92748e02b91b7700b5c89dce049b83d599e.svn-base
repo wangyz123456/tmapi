@@ -1,0 +1,623 @@
+package com.example.tmapi.springtask;
+
+import com.example.tmapi.chart.*;
+import com.example.tmapi.dao.slave.ContrastSaleDataDao;
+import com.example.tmapi.dao.slave.ContrastStoreSaleDataDao;
+import com.example.tmapi.dao.slave.StockRobotDao;
+import com.example.tmapi.email.EmailServiceImp;
+import com.example.tmapi.email.RobotSendServiceImpl;
+import com.example.tmapi.entity.*;
+import com.example.tmapi.service.GoalSetService;
+import com.example.tmapi.service.ItemsService;
+import com.example.tmapi.service.PurchaseItemBakService;
+import com.example.tmapi.utils.ChartData;
+import com.example.tmapi.utils.DataUtil;
+import com.example.tmapi.utils.DrawTableImgs;
+
+import com.example.tmapi.utils.MapSortUtil;
+import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import javax.swing.*;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+@Component
+@EnableScheduling
+public class TestSpringTask {
+
+    public Map<String,Object> map = new HashMap();
+
+    @Autowired
+    private GoalSetService goalSetService;
+    @Autowired
+    EmailServiceImp emailServiceImp;
+    @Value("${spring.mail.touser}")
+    private String user;
+    @Value("${serverUrl}")
+    private String serverUrl;
+    @Autowired
+    private ContrastSaleDataDao contrastSaleDataDao;
+    @Autowired
+    private ContrastStoreSaleDataDao contrastStoreSaleDataDao;
+    @Autowired
+    private ItemsService itemsService;
+    @Autowired
+    private PurchaseItemBakService purchaseItemBakService;
+    @Autowired
+    private StockRobotDao stockRobotDao;
+    //共享资源
+    static int count =0;
+    /**
+     * synchronized 修饰实例方法
+     */
+    public synchronized void increase(){
+        count++;
+    }
+
+    /**
+     * 库存商品销售
+     */
+    @Async
+   @Scheduled(cron = "${timer.cron.str4}")
+    public void zxspxsTask(){
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @SneakyThrows
+            @Override
+            public void run() {
+                RobotSendServiceImpl robot= new RobotSendServiceImpl();
+                StockRobot stockRobot = new StockRobot();
+                List<StockRobot> urlList =  stockRobotDao.queryByCond(stockRobot);
+                Map<String,Object> urlMap = new HashMap<>();
+                for (StockRobot stockRobotDto:urlList) {
+                    urlMap.put(stockRobotDto.getStoreId(),stockRobotDto.getAddURL());
+                }
+                PurchaseItemBak dto = new PurchaseItemBak();
+                List<PurchaseItemBak> list = purchaseItemBakService.queryByDateTime(dto);
+//                for (PurchaseItemBak purchaseItemBak:list) {
+//                    robot.sendMsg(purchaseItemBak.toString(), urlMap.get(purchaseItemBak.getStoreId())+"");
+//                }
+
+                for (Map.Entry<String, Object> entry : urlMap.entrySet()) {
+                    List<PurchaseItemBak> newList = new ArrayList<>();
+                    String storeName = "";
+                    for (PurchaseItemBak purchaseItemBak:list) {
+                        if(entry.getKey().equals(purchaseItemBak.getStoreId())){
+                            storeName=purchaseItemBak.getStoreName();
+                            newList.add(purchaseItemBak);
+                        }
+                    }
+                    if(newList.size()>0)
+                    creatTaskXKC(newList,entry.getValue()+"",storeName);
+
+                }
+
+            }
+        });
+    }
+
+
+    @Async
+    @Scheduled(cron = "${timer.cron.str3}")
+    public void zxspTask(){
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Items items =new Items();
+                Map<String,Object> zxmap = itemsService.queryByDate(items);
+
+                List<Items> wList = (List<Items>) zxmap.get("resultWList");
+                List<Items> yList = (List<Items>) zxmap.get("resultYList");
+                String[] storeIds = {"070", "064", "065", "030", "121", "055", "003", "004", "005", "006", "007", "106", "008","118","329"};
+                Map<String,Object> resultMap = new HashMap<>();
+                Map<String,Object> mdrMap = new HashMap<>();
+                Map<String,Object> wxMap = new HashMap<>();
+                Map<String,Object> zMap = new HashMap<>();
+                resultMap.put("mdrMap",mdrMap);
+                resultMap.put("wxMap",wxMap);
+                resultMap.put("zMap",zMap);
+
+                for (String storeID:storeIds) {
+                    resultMap = creatTaskZX(wList,storeID,yList,resultMap);
+                }
+
+                creatZxZbTask(resultMap);
+
+            }
+        });
+
+    }
+
+
+    @Async
+    @Scheduled(cron = "${timer.cron.str2}")
+    public void dsrwTask(){
+        ChartData chartData = goalSetService.queryByDate("");
+        map.clear();
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @SneakyThrows
+            @Override
+            public void run() {
+                creatTaskXm(chartData);
+
+                new GaugeChart().createChart("零售销售完成度",creatPath("零售销售完成度"),chartData.getLsxswcdMap());
+
+                new GaugeChart().createChart("总销售额完成度",creatPath("总销售额完成度"),chartData.getZxsewcdMap());
+
+                new GaugeChart().createChart("批发销售完成度",creatPath("批发销售完成度"),chartData.getPfxswcdMap());
+
+                new GaugeChart().createChart("零售毛利完成度",creatPath("零售毛利完成度"),chartData.getLsmlwcdMap());
+
+                new GaugeChart().createChart("总毛利完成度",creatPath("总毛利完成度"),chartData.getZmlwcdMap());
+
+                new GaugeChart().createChart("批发毛利完成度",creatPath("批发毛利完成度"),chartData.getPfmlwcdMap());
+
+                new BarChart3DChartH().createChart(creatPath("总销售达标率"),chartData.getZxsdblMap(),"总销售达标率");
+
+                new BarChart3DChartH().createChart(creatPath("今日总毛利达标率"),chartData.getTmldblMap(),"今日总毛利达标率");
+                RobotSendServiceImpl robot= new RobotSendServiceImpl();
+                String top ="";
+                for (Map.Entry<String, Object> m : chartData.getTmldblMap().entrySet()) {
+                    top = m.getKey();
+                    break;
+                }
+                robot.sendMsg(map.get("今日总毛利达标率").toString(),"今日总毛利达标率","目前完成度最高的是:"+top+"\n",serverUrl);
+
+                new ChartsMixedY().createMixedCharts(creatPath("月度零售对比曲线"),chartData);
+
+                new ChartsMixed().createMixedCharts(creatPath("门店零售同比"),chartData);
+                robot.sendMsg(map.get("门店零售同比").toString(),"门店零售同比","每天进步一点点！",serverUrl);
+
+                new ChartsMixedH().createMixedCharts(creatPath("门店零售环比"),chartData);
+
+                new BarChart3DChartH().createChart(creatPath("总毛利达标率"),chartData.getZmldblMap(),"总毛利达标率");
+                robot.sendMsg(map.get("总毛利达标率").toString(),"总毛利达标率","加油！必胜！",serverUrl);
+
+                new BarChart3DChartHJMD().createChart(creatPath("加盟店业绩排名"),chartData,"加盟店业绩排名");
+
+                //会员经营日报表
+                creatTask(chartData);
+
+                //添加当日零售销售记录
+                List<ContrastStoreSaleData> list= new ArrayList<>();
+                for (Map.Entry<String, Object> entry : chartData.getMdlstdMapID().entrySet()) {
+                    ContrastStoreSaleData dto = new ContrastStoreSaleData();
+                    dto.setDate(DataUtil.getFormat());
+                    dto.setStoreId(entry.getKey());
+                    dto.setLxamt((BigDecimal) entry.getValue());
+                    list.add(dto);
+                }
+                contrastStoreSaleDataDao.insertForeach(list);
+                ContrastSaleData contrastSaleData = new ContrastSaleData();
+                contrastSaleData.setDate(DataUtil.getFormat());
+                contrastSaleData.setLxamt(chartData.getTodayLSXS().setScale(2, BigDecimal.ROUND_HALF_UP));
+                contrastSaleDataDao.save(contrastSaleData);
+
+                //发送邮件
+                String content = "总销售额："+chartData.getTodayZXS().setScale(2, BigDecimal.ROUND_HALF_UP)+"元，总毛利额："+chartData.getTodayZML().setScale(2, BigDecimal.ROUND_HALF_UP)+"元，综合毛利率："+delShuju(chartData.getTodayZML(),chartData.getTodayZXS())+"；"+"\n"
+                        +"零售额："+chartData.getTodayLSXS().setScale(2, BigDecimal.ROUND_HALF_UP)+"元，零售毛利："+chartData.getTodayLSML().setScale(2, BigDecimal.ROUND_HALF_UP)+"元，零售毛利率："+delShuju(chartData.getTodayLSML(),chartData.getTodayLSXS())+"；"+"\n"
+                        +"批发额："+chartData.getTodayPFXS().setScale(2, BigDecimal.ROUND_HALF_UP)+"元，批发毛利："+chartData.getTodayPFML().setScale(2, BigDecimal.ROUND_HALF_UP)+"元，批发毛利率:"+delShuju(chartData.getTodayPFML(),chartData.getTodayPFXS())+"；"+"\n"
+                        +"\n"+"\n"
+                        +"总销售额达标率："+chartData.getZxsewcdMap().get("总销售额完成度")+"%，总毛利额达标率："+chartData.getZmlwcdMap().get("总毛利完成度")+"%；"+"\n"
+                        +"零售销售达标率："+chartData.getLsxswcdMap().get("零售销售完成度")+"%，零售毛利达标率："+chartData.getLsmlwcdMap().get("零售毛利完成度")+"%；"+"\n"
+                        +"批发销售达标率："+chartData.getPfxswcdMap().get("批发销售完成度")+"%，批发毛利达标率："+chartData.getPfmlwcdMap().get("批发毛利完成度")+"%；";
+                String[] fileNames = new String[map.size()];
+                        int m=0;
+                        for (Map.Entry<String, Object> entry : MapSortUtil.sortByValueAsc(map).entrySet()) {
+                            fileNames[m] = entry.getValue().toString();
+                            m++;
+                        }
+                emailServiceImp.sendAttachmentMail(user, DataUtil.getNow()+"销售日报表",content,fileNames);
+
+            }
+        });
+
+
+    }
+
+    @Async
+    @Scheduled(cron = "${timer.cron.str1}")
+    public void testTask() {
+        ChartData chartData = goalSetService.queryByDate("");
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @SneakyThrows
+            @Override
+            public void run() {
+
+                creatTaskXm(chartData);
+
+                new ChartsMixed().createMixedCharts(creatPath("门店零售同比"),chartData);
+                RobotSendServiceImpl robot= new RobotSendServiceImpl();
+                robot.sendMsg(map.get("门店零售同比").toString(),"门店零售同比","每天进步一点点！",serverUrl);
+
+                new BarChart3DChartH().createChart(creatPath("总毛利达标率"),chartData.getZmldblMap(),"总毛利达标率");
+                robot.sendMsg(map.get("总毛利达标率").toString(),"总毛利达标率","加油！必胜！",serverUrl);
+
+                new BarChart3DChartH().createChart(creatPath("今日总毛利达标率"),chartData.getTmldblMap(),"今日总毛利达标率");
+                String top ="";
+                for (Map.Entry<String, Object> m : chartData.getTmldblMap().entrySet()) {
+                    top = m.getKey();
+                    break;
+                }
+                robot.sendMsg(map.get("今日总毛利达标率").toString(),"今日总毛利达标率","目前完成度最高的是:"+top+"\n",serverUrl);
+
+            }
+        });
+
+
+    }
+
+    /**
+     * 保存生成图片路径
+     * @param s1 s1
+     * @return ss
+     */
+    public String creatPath(String s1){
+        String ss = "E:\\PHPCUSTOM\\wwwroot\\ribaobiao\\dailyPic\\"+ new SimpleDateFormat("yyyyMMdd-HHmmssSSS").format(new Date())+".jpg";
+        map.put(s1,ss);
+         return ss;
+    }
+
+    /**
+     * 处理数据
+     */
+    public String delShuju(BigDecimal x,BigDecimal y){
+
+        if(x==null||y==null||x.equals(new BigDecimal(0))||y.equals(new BigDecimal(0))){
+            return "0%";
+        }else {
+            return x.multiply(new BigDecimal(100)).divide(y, 2, BigDecimal.ROUND_HALF_UP)+"%";
+        }
+
+    }
+    /**
+     * 生成今日销售 库存商品 日报表
+     * @param list<PurchaseItemBak>  list
+     * @param str str
+     */
+    public void creatTaskXKC(List<PurchaseItemBak> list,String str,String storeName) {
+        String[][] tableData2 = new String[list.size() + 1][8];
+        String[] tt = {"售货员", "销售时间", "数量", "商品名称", "原价","售价", "总金额", "最后进货日期"};
+
+        DrawTableImgs cg = new DrawTableImgs();
+        try {
+            for (int i = 0; i < tt.length; i++) {
+                tableData2[0][i] = tt[i];
+            }
+
+            for (int i = 0; i < list.size(); i++) {
+                for (int j = 0; j < tt.length; j++) {
+                    switch (j) {
+                        case 0:
+                            tableData2[i + 1][j] = list.get(i).getSellerId();
+                            break;
+                        case 1:
+                            tableData2[i + 1][j] = list.get(i).getBuyTime();
+                            break;
+                        case 2:
+                            tableData2[i + 1][j] = list.get(i).getQty().setScale(2, BigDecimal.ROUND_HALF_UP)+ "";
+                            break;
+                        case 3:
+                            tableData2[i + 1][j] = list.get(i).getName();
+                            break;
+                        case 4:
+                            tableData2[i + 1][j] = list.get(i).getOldPrice().setScale(2, BigDecimal.ROUND_HALF_UP)+ "";
+                            break;
+                        case 5:
+                            tableData2[i + 1][j] = list.get(i).getPrice().setScale(2, BigDecimal.ROUND_HALF_UP)+""  ;
+                            break;
+                        case 6:
+                            tableData2[i + 1][j] = list.get(i).getAmount().setScale(2, BigDecimal.ROUND_HALF_UP)+"" ;
+                            break;
+                        case 7:
+                            tableData2[i + 1][j] = DataUtil.format(list.get(i).getLastInDate(),"yyyy-MM-dd");
+                            break;
+                        default:
+                            System.out.println("default");
+                            break;
+                    }
+
+
+                }
+            }
+
+            cg.myGraphicsGeneration(tableData2, creatPath(storeName+"：库存商品销售日报表"),storeName+"：库存商品销售日报表");
+            RobotSendServiceImpl robot= new RobotSendServiceImpl();
+            robot.sendMsg(map.get(storeName+"：库存商品销售日报表").toString(),storeName+"：库存商品销售日报表","加油！",str);
+//            robot.sendMsg(map.get(storeName+"：库存商品销售日报表").toString(),storeName+"：库存商品销售日报表","加油！",serverUrl);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    /**
+     * 生成滞销表单
+     * @param list list
+     * @param storeId storeId
+     * @param ylist ylist
+     * @param resultMap resultMap
+     * @return map
+     */
+    public Map<String,Object> creatTaskZX(List<Items> list,String storeId,List<Items> ylist,Map<String,Object> resultMap) {
+        List<Items> newList = new ArrayList<>();
+        String storeName = "";
+        BigDecimal fz = new BigDecimal(0);
+        BigDecimal fm = new BigDecimal(0);
+
+        for (Items items:list) {
+            if(storeId.equals(items.getStoreId())){
+                newList.add(items);
+                fz = fz.add(items.getCBAmount());
+                storeName = items.getStoreName();
+            }
+
+        }
+
+        for (Items items:ylist) {
+            if(storeId.equals(items.getStoreId())){
+              fm =  fm.add(items.getCBAmount());
+            }
+        }
+        if(newList.size()>0) {
+            Map<String,Object> mdrMap = (Map<String, Object>) resultMap.get("mdrMap");
+            Map<String,Object> wxMap = (Map<String, Object>) resultMap.get("wxMap");
+            Map<String,Object> zMap = (Map<String, Object>) resultMap.get("zMap");
+            wxMap.put(storeName,fz.setScale(2, BigDecimal.ROUND_HALF_UP));
+            zMap.put(storeName,fm.add(fz).setScale(2, BigDecimal.ROUND_HALF_UP));
+            mdrMap.put(storeName,fz.multiply(new BigDecimal(100)).divide(fm.add(fz), 2, BigDecimal.ROUND_HALF_UP));
+            String[][] tableData2 = new String[newList.size() + 1][7];
+            String[] tt = {"分店名称", "大类编码", "条码", "名称", "售价", "进货数量", "进货金额"};
+
+            DrawTableImgs cg = new DrawTableImgs();
+            try {
+                for (int i = 0; i < tt.length; i++) {
+                    tableData2[0][i] = tt[i];
+                }
+
+                for (int i = 0; i < newList.size(); i++) {
+                    for (int j = 0; j < tt.length; j++) {
+                        switch (j) {
+                            case 0:
+                                tableData2[i + 1][j] = newList.get(i).getStoreName();
+                                break;
+                            case 1:
+                                tableData2[i + 1][j] = newList.get(i).getKindCode();
+                                break;
+                            case 2:
+                                tableData2[i + 1][j] = newList.get(i).getBarCode();
+                                break;
+                            case 3:
+                                tableData2[i + 1][j] = newList.get(i).getName();
+                                break;
+                            case 4:
+                                tableData2[i + 1][j] = newList.get(i).getPrice().setScale(2, BigDecimal.ROUND_HALF_UP)+ "";
+                                break;
+                            case 5:
+                                tableData2[i + 1][j] = newList.get(i).getRecQty().setScale(2, BigDecimal.ROUND_HALF_UP)+""  ;
+                                break;
+                            case 6:
+                                tableData2[i + 1][j] = newList.get(i).getCBAmount().setScale(2, BigDecimal.ROUND_HALF_UP)+"" ;
+                                break;
+                            default:
+                                System.out.println("default");
+                                break;
+                        }
+
+
+                    }
+                }
+
+                cg.myGraphicsGeneration(tableData2, creatPath(storeName+"：15天未销售商品报表"),storeName+"：15天未销售商品报表，进货日期："+DataUtil.format(DataUtil.addDay(DataUtil.getFormat(),-15)));
+                RobotSendServiceImpl robot= new RobotSendServiceImpl();
+                robot.sendMsg(map.get(storeName+"：15天未销售商品报表").toString(),storeName+"：15天未销售商品报表","请及时处理！",serverUrl);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        return resultMap;
+
+    }
+
+    /**
+     * 生成今日销售，毛利 日报表
+     * @param chartData  chartData
+     */
+    public void creatTaskXm(ChartData chartData) {
+        String[][] tableData2 = new String[chartData.getTmldblMap().size()+2][8];
+        String[] tt = {"门店名称","销售目标","毛利目标","销售额","毛利额","销售达标率","毛利达标率","是否完成"};
+        String[] categories = new String[chartData.getTmldblMap().size()];
+
+        int m = 0;
+        for (Map.Entry<String, Object> entry : chartData.getTmldblMap().entrySet()) {
+            categories[m]=entry.getKey();
+            m++;
+        }
+        DrawTableImgs cg = new DrawTableImgs();
+        try {
+            for (int i = 0; i < tt.length; i++) {
+                tableData2[0][i]=tt[i];
+            }
+
+            for (int i = 0; i < chartData.getTmldblMap().size(); i++) {
+                for (int j = 0; j < tt.length; j++) {
+                    switch(j){
+                        case 0:
+                            tableData2[i+1][j]=categories[i];break;
+                        case 1:
+                            tableData2[i+1][j]=chartData.getJrzxsTagMap().get(categories[i])==null?0+"":chartData.getJrzxsTagMap().get(categories[i])+"";
+                            break;
+                        case 2:
+                            tableData2[i+1][j]=chartData.getJrzmlTagMap().get(categories[i])==null?0+"":chartData.getJrzmlTagMap().get(categories[i])+"";
+                            break;
+                        case 3:
+                            tableData2[i+1][j]=chartData.getJrzxsSjMap().get(categories[i])==null?0+"":chartData.getJrzxsSjMap().get(categories[i])+"";
+                            break;
+                        case 4:
+                            tableData2[i+1][j]=chartData.getJrzmlSjMap().get(categories[i])==null?0+"":chartData.getJrzmlSjMap().get(categories[i])+"";
+                            break;
+                        case 5:
+                            tableData2[i+1][j]=chartData.getZxsdblMap().get(categories[i])==null?0+"%":chartData.getZxsdblMap().get(categories[i])+"%";
+                            break;
+                        case 6:
+                            tableData2[i+1][j]=chartData.getTmldblMap().get(categories[i])==null?0+"%":chartData.getTmldblMap().get(categories[i])+"%";
+                            break;
+                        case 7:
+                            BigDecimal big = (BigDecimal)chartData.getTmldblMap().get(categories[i]);
+                            tableData2[i+1][j]=big.compareTo(new BigDecimal(100)) == 1?"是":"否";
+                            break;
+                        default:
+                            System.out.println("default");break;
+                    }
+
+
+
+                }
+            }
+
+            tableData2[chartData.getTmldblMap().size()+1][0]="合计";
+            tableData2[chartData.getTmldblMap().size()+1][1]=MapSortUtil.getSum(chartData.getJrzxsTagMap()).setScale(2, BigDecimal.ROUND_HALF_UP)+"";
+            tableData2[chartData.getTmldblMap().size()+1][2]=MapSortUtil.getSum(chartData.getJrzmlTagMap()).setScale(2, BigDecimal.ROUND_HALF_UP)+"";
+            tableData2[chartData.getTmldblMap().size()+1][3]=MapSortUtil.getSum(chartData.getJrzxsSjMap()).setScale(2, BigDecimal.ROUND_HALF_UP)+"";
+            tableData2[chartData.getTmldblMap().size()+1][4]=MapSortUtil.getSum(chartData.getJrzmlSjMap()).setScale(2, BigDecimal.ROUND_HALF_UP)+"";
+            tableData2[chartData.getTmldblMap().size()+1][5]=chartData.getTmldblMap().size()>0?MapSortUtil.getSum(chartData.getZxsdblMap()).divide(new BigDecimal(chartData.getTmldblMap().size()), 2, BigDecimal.ROUND_HALF_UP)+"%":0+"%";
+            tableData2[chartData.getTmldblMap().size()+1][6]=chartData.getTmldblMap().size()>0?MapSortUtil.getSum(chartData.getTmldblMap()).divide(new BigDecimal(chartData.getTmldblMap().size()), 2, BigDecimal.ROUND_HALF_UP)+"%":0+"%";
+            tableData2[chartData.getTmldblMap().size()+1][7]="";
+
+            cg.myGraphicsGeneration(tableData2, creatPath("销售日报表"),"销售日报表");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * 生成会员表单
+     * @param chartData  chartData
+     */
+    public void creatTask(ChartData chartData) {
+                String[][] tableData2 = new String[chartData.getMdljhysMap().size()+1][6];
+                String[] tt = {"门店名称","门店累计会员数","今日新增会员数","今日消费会员数","今日会员客单价","今日会员消费占比"};
+                String[] categories = new String[chartData.getMdljhysMap().size()];
+
+                int m = 0;
+                for (Map.Entry<String, Object> entry : chartData.getMdljhysMap().entrySet()) {
+                    categories[m]=entry.getKey();
+                    m++;
+                }
+                DrawTableImgs cg = new DrawTableImgs();
+                try {
+                    for (int i = 0; i < tt.length; i++) {
+                        tableData2[0][i]=tt[i];
+                    }
+
+                    for (int i = 0; i < chartData.getMdljhysMap().size(); i++) {
+                        for (int j = 0; j < tt.length; j++) {
+                            switch(j){
+                                case 0:
+                                    tableData2[i+1][j]=categories[i];break;
+                                case 1:
+                                    tableData2[i+1][j]=chartData.getMdljhysMap().get(categories[i])==null?0+"":chartData.getMdljhysMap().get(categories[i])+"";
+                                    break;
+                                case 2:
+                                    tableData2[i+1][j]=chartData.getJrxzhysMap().get(categories[i])==null?0+"":chartData.getJrxzhysMap().get(categories[i])+"";
+                                    break;
+                                case 3:
+                                    tableData2[i+1][j]=chartData.getJrxfhysMap().get(categories[i])==null?0+"":chartData.getJrxfhysMap().get(categories[i])+"";
+                                    break;
+                                case 4:
+                                    tableData2[i+1][j]=chartData.getJrhykdjMap().get(categories[i])==null?0+"":chartData.getJrhykdjMap().get(categories[i])+"";
+                                    break;
+                                case 5:
+                                    tableData2[i+1][j]=chartData.getJrhyxfzbMap().get(categories[i])==null?0+"%":chartData.getJrhyxfzbMap().get(categories[i])+"%";
+                                    break;
+                                default:
+                                    System.out.println("default");break;
+                            }
+
+
+
+                        }
+                    }
+
+                    cg.myGraphicsGeneration(tableData2, creatPath("会员经营日报表"),"会员经营日报表");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+    }
+
+    /**
+     * 生成滞销占比表单
+     * @param resultMap
+     */
+    public void creatZxZbTask(Map<String, Object> resultMap) {
+        Map<String,Object> mdrMap = (Map<String, Object>) resultMap.get("mdrMap");
+        Map<String,Object> wxMap = (Map<String, Object>) resultMap.get("wxMap");
+        Map<String,Object> zMap = (Map<String, Object>) resultMap.get("zMap");
+        mdrMap=MapSortUtil.sortByValueDesc(mdrMap);
+
+        String[][] tableData2 = new String[mdrMap.size()+1][4];
+        String[] tt = {"门店名称","进货成本总金额","未动销商品成本金额","未动销商品占比"};
+        String[] categories = new String[mdrMap.size()];
+
+        int m = 0;
+        for (Map.Entry<String, Object> entry : mdrMap.entrySet()) {
+            categories[m]=entry.getKey();
+            m++;
+        }
+        DrawTableImgs cg = new DrawTableImgs();
+        try {
+            for (int i = 0; i < tt.length; i++) {
+                tableData2[0][i]=tt[i];
+            }
+
+            for (int i = 0; i < mdrMap.size(); i++) {
+                for (int j = 0; j < tt.length; j++) {
+                    switch(j){
+                        case 0:
+                            tableData2[i+1][j]=categories[i];break;
+                        case 1:
+                            tableData2[i+1][j]=zMap.get(categories[i])==null?0+"":zMap.get(categories[i])+"";
+                            break;
+                        case 2:
+                            tableData2[i+1][j]=wxMap.get(categories[i])==null?0+"":wxMap.get(categories[i])+"";
+                            break;
+                        case 3:
+                            tableData2[i+1][j]=mdrMap.get(categories[i])==null?0+"":mdrMap.get(categories[i])+"%";
+                            break;
+                        default:
+                            System.out.println("default");break;
+                    }
+
+
+
+                }
+            }
+
+            cg.myGraphicsGeneration(tableData2, creatPath("滞销商品占比报表"),"滞销商品占比报表，进货确认日期："+DataUtil.format(DataUtil.addDay(DataUtil.getFormat(),-15)));
+            RobotSendServiceImpl robot= new RobotSendServiceImpl();
+            robot.sendMsg(map.get("滞销商品占比报表").toString(),"滞销商品占比报表","请及时处理！",serverUrl);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+}

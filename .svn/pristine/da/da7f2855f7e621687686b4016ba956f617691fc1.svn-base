@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.tmapi.dao.master.TargetsSellerDao">
+
+    <select id="queryTargetsSellerByCond" resultType="com.example.tmapi.entity.TargetsSeller" parameterType="com.example.tmapi.entity.TargetsSeller">
+        select Goals from TargetsSeller
+        WHERE 1=1
+        <if test="targetsSeller.storeId != null">
+            and StoreID = #{targetsSeller.storeId}
+        </if>
+        <if test="targetsSeller.sellerId != null">
+            and SellerID = #{targetsSeller.sellerId}
+        </if>
+        <if test="targetsSeller.date != null">
+            and Date = #{targetsSeller.date}
+        </if>
+
+    </select>
+
+
+    <select id="queryByStoreId" resultType="com.example.tmapi.entity.TargetsSeller" parameterType="com.example.tmapi.entity.TargetsSeller">
+        SELECT
+        t.SellerId,
+        p.SellerName as sellerName,
+        t.StoreID,
+        s.StoreName,
+        t.Goals
+        FROM
+        TargetsSeller t,
+        Stores s,
+        POSSeller p
+        WHERE
+        t.StoreID = s.StoreID
+        and t.SellerID = p.SellerID
+        <if test="targetsSeller.storeId != null">
+            and t.StoreID = #{targetsSeller.storeId}
+        </if>
+        <if test="targetsSeller.sellerId != null and targetsSeller.sellerId !='' ">
+            and t.SellerID = #{targetsSeller.sellerId}
+        </if>
+        <if test="targetsSeller.date != null">
+            and t.Date = #{targetsSeller.date}
+        </if>
+
+        GROUP BY  t.SellerId,p.SellerName,t.StoreID,s.StoreName,
+        t.Goals
+    </select>
+
+</mapper>

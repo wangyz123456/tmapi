@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.tmapi.dao.master.ClientPurItemDao">
+
+    <select id="queryByCond" resultType="com.example.tmapi.entity.ClientPurItem" parameterType="com.example.tmapi.entity.ClientPurItem">
+        SELECT
+            ci.StoreID as storeId,
+            SUM (ci.SalePrice * ci.SendQty) AS totalAmount ,
+        SUM (ci.StockPrice * ci.SendQty) AS saleCost ,
+        SUM (ci.SalePrice * ci.SendQty - ci.StockPrice * ci.SendQty) AS sumProfit
+        FROM
+            ClientPurItem ci
+        LEFT JOIN ClientPur c ON ci.StoreID = c.StoreID
+        AND ci.SheetID = c.SheetID
+        WHERE
+            c.CheckDate = #{clientPurItem.startDate}
+        GROUP BY
+            ci.StoreID
+    </select>
+
+</mapper>

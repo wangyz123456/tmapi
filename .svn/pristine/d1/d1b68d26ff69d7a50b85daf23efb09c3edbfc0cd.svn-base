@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.tmapi.dao.slave.ContrastBDateDao">
+
+    <select id="queryByCond" resultType="com.example.tmapi.entity.ContrastBDate" parameterType="com.example.tmapi.entity.ContrastBDate">
+        SELECT
+        *
+        FROM
+        contrast_bdate
+        WHERE
+        1 = 1
+        AND   year = #{contrastBDate.year}
+        and   month = #{contrastBDate.month}
+    </select>
+
+
+</mapper>
