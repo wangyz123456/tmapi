@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.tmapi.dao.master.RPTBase0005Dao">
+
+    <select id="queryByCond" resultType="com.example.tmapi.entity.RPTBase0005">
+        SELECT
+        b.StoreID AS storeId,
+        s.StoreName as storeName,
+        SUM (b.TotalAmount) AS totalAmount,
+        SUM (b.TotalAmount - SaleCost) AS sumProfit
+        FROM
+        RPT_Base0005 b,Stores s
+        WHERE
+        b.StoreID = s.StoreID
+        AND b.RunDate >= #{rPTBase0005.startTime}
+        and b.RunDate &lt; #{rPTBase0005.endTime}
+        <if test="rPTBase0005.storeId != null and rPTBase0005.storeId !=''">
+            and b.StoreID = #{rPTBase0005.storeId}
+        </if>
+        AND b.TotalAmount > 0
+        and b.storeID!='015'
+        and b.storeID!='047'and b.storeID!='060'
+        GROUP BY
+        b.storeID ,s.StoreName
+
+    </select>
+
+</mapper>

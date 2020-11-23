@@ -237,8 +237,8 @@ public class TestSpringTask {
             public void run() {
                 RobotSendServiceImpl robot= new RobotSendServiceImpl();
 
-                new ChartsMixedT().createMixedCharts(creatPath("门店销售同比分析"),rPTBase0005Service.queryByCond(new RPTBase0005()));
-                robot.sendMsg(map.get("门店销售同比分析").toString(),"门店销售同比分析,统计至"+DataUtil.format(DataUtil.initYestDayDateByMonthY(),"yyyy-MM-dd"),"每天进步一点点！",serverUrl);
+//                new ChartsMixedT().createMixedCharts(creatPath("门店销售同比分析"),rPTBase0005Service.queryByCond(new RPTBase0005()));
+//                robot.sendMsg(map.get("门店销售同比分析").toString(),"门店销售同比分析","每天进步一点点！",serverUrl);
 
                 new ChartsMixed().createMixedCharts(creatPath("门店零售同比"),chartData);
                 robot.sendMsg(map.get("门店零售同比").toString(),"门店零售同比","每天进步一点点！",serverUrl);
@@ -359,12 +359,11 @@ public class TestSpringTask {
         String storeName = "";
         BigDecimal fz = new BigDecimal(0);
         BigDecimal fm = new BigDecimal(0);
-        BigDecimal zs = new BigDecimal(0);
+
         for (Items items:list) {
             if(storeId.equals(items.getStoreId())){
                 newList.add(items);
                 fz = fz.add(items.getCBAmount());
-                zs = zs.add(items.getRecQty());
                 storeName = items.getStoreName();
             }
 
@@ -382,7 +381,7 @@ public class TestSpringTask {
             wxMap.put(storeName,fz.setScale(2, BigDecimal.ROUND_HALF_UP));
             zMap.put(storeName,fm.add(fz).setScale(2, BigDecimal.ROUND_HALF_UP));
             mdrMap.put(storeName,fz.multiply(new BigDecimal(100)).divide(fm.add(fz), 2, BigDecimal.ROUND_HALF_UP));
-            String[][] tableData2 = new String[newList.size() + 2][7];
+            String[][] tableData2 = new String[newList.size() + 1][7];
             String[] tt = {"分店名称", "大类编码", "条码", "名称", "售价", "进货数量", "进货金额"};
 
             DrawTableImgs cg = new DrawTableImgs();
@@ -424,13 +423,6 @@ public class TestSpringTask {
                     }
                 }
 
-                tableData2[newList.size() + 1][0]="合计";
-                tableData2[newList.size() + 1][1]="";
-                tableData2[newList.size() + 1][2]="";
-                tableData2[newList.size() + 1][3]="";
-                tableData2[newList.size() + 1][4]="";
-                tableData2[newList.size() + 1][5]=zs+"";
-                tableData2[newList.size() + 1][6]=fz.setScale(2, BigDecimal.ROUND_HALF_UP)+"";
                 cg.myGraphicsGeneration(tableData2, creatPath(storeName+"：15天未销售商品报表"),storeName+"：15天未销售商品报表，进货日期："+DataUtil.format(DataUtil.addDay(DataUtil.getFormat(),-15)));
                 RobotSendServiceImpl robot= new RobotSendServiceImpl();
                 robot.sendMsg(map.get(storeName+"：15天未销售商品报表").toString(),storeName+"：15天未销售商品报表","请及时处理！",serverUrl);

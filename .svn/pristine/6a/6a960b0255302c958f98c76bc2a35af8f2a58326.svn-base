@@ -40,18 +40,6 @@
             <artifactId>tomcat-embed-jasper</artifactId>
         </dependency>
 
-        <!--添加MySql依赖-->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-        </dependency>
-
-        <!--添加JDBC依赖-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
-        </dependency>
-
         <!-- redis添加 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
